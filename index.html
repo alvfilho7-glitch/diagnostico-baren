@@ -3,146 +3,417 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>M&A Readiness · BAREN</title>
+  <meta name="description" content="Diagnóstico estratégico BAREN para M&A, crescimento e valorização de empresas." />
+  <title>BAREN · Diagnóstico Estratégico</title>
   
+  <!-- ============================================ -->
+  <!-- FONTS                                        -->
+  <!-- ============================================ -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   
+  <!-- ============================================ -->
+  <!-- CHART.JS                                     -->
+  <!-- ============================================ -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <!-- ============================================ -->
+  <!-- STYLES                                       -->
+  <!-- ============================================ -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- ============================================ -->
+  <!-- ORBS DE FUNDO (efeito visual)                -->
+  <!-- ============================================ -->
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
-  
-  <div class="app">
-    <div class="nav-header">
-      <div class="logo-group">
-        <div class="logo-img-wrapper">
-          <img class="logo-img" src="https://uploads.onecompiler.io/44sp66u37/1785965191250/logo-baren.jpeg" alt="BAREN Estratégia" />
-        </div>
-      </div>
-      <div class="badge-risk">M&A · INTERNO</div>
-    </div>
+  <div class="orb orb-3"></div>
 
+  <!-- ============================================ -->
+  <!-- APP PRINCIPAL                                -->
+  <!-- ============================================ -->
+  <div class="app">
+    
+    <!-- ========== HEADER ========== -->
+    <header class="nav-header">
+      <div class="logo-group">
+        <div class="logo-icon">B</div>
+        <span class="logo-text">BAREN</span>
+        <span class="logo-tag">estratégia</span>
+      </div>
+      <div class="header-right">
+        <span class="badge-risk">⚡ M&A · READINESS</span>
+        <span class="badge-version">v2.0</span>
+      </div>
+    </header>
+
+    <!-- ========== PROGRESSO ========== -->
     <div id="progressContainer" style="display:none;">
       <div class="progress-strip">
-        <span class="progress-counter" id="stepCounter">01 / 20</span>
-        <div class="progress-track"><div class="progress-fill" id="progressFillGlobal"></div></div>
-        <span class="progress-percent" id="percentProgress">0%</span>
+        <div class="progress-left">
+          <span class="progress-counter" id="stepCounter">01 / 20</span>
+          <span class="progress-label">Perguntas</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFillGlobal"></div>
+        </div>
+        <div class="progress-right">
+          <span class="progress-percent" id="percentProgress">0%</span>
+          <span class="progress-label">concluído</span>
+        </div>
       </div>
     </div>
 
-    <div class="main-content">
-      <!-- INTRO -->
-      <div class="screen active" id="introScreen">
-        <div class="tag-accent"><span>⚡ M&A READINESS</span></div>
-        <h1 class="main-title">DIAGNÓSTICO <br><span class="gradient-outline">BAREN</span></h1>
-        <div style="height:2px;width:80px;background:var(--accent);margin-bottom:24px;"></div>
-        <p class="desc">Ferramenta de apoio para consultores BAREN. Responda as perguntas e obtenha um diagnóstico detalhado com radar, alertas por severidade e simulador de impacto.</p>
-        <div class="stats-grid">
-          <div class="stat-cell"><div class="stat-num">5</div><div class="stat-label">pilares<br>analisados</div></div>
-          <div class="stat-cell"><div class="stat-num">~20</div><div class="stat-label">perguntas<br>dinâmicas</div></div>
-          <div class="stat-cell"><div class="stat-num">radar</div><div class="stat-label">dashboard<br>visual</div></div>
-          <div class="stat-cell"><div class="stat-num">simulador</div><div class="stat-label">projeções<br>estratégicas</div></div>
-        </div>
-        <button class="btn-primary" id="startBtn">INICIAR DIAGNÓSTICO →</button>
-      </div>
-
-      <!-- ROOT -->
-      <div class="screen" id="rootScreen">
-        <div class="q-card">
-          <div class="q-header"><span class="q-index">01</span><span class="q-text">Qual o principal objetivo da empresa?</span></div>
-          <div style="font-size:14px;color:var(--white-dim);margin-bottom:8px;">Selecione todas as opções que se aplicam</div>
-          <div class="options-group" id="rootOptions"></div>
-          <div class="nav-buttons">
-            <button class="btn-secondary" id="rootBackBtn">VOLTAR</button>
-            <button class="btn-next" id="rootNextBtn">AVANÇAR</button>
+    <!-- ========== CONTEÚDO PRINCIPAL ========== -->
+    <main class="main-content" id="mainContent">
+      
+      <!-- ======================================== -->
+      <!-- TELA 1: INTRO                            -->
+      <!-- ======================================== -->
+      <section class="screen active" id="introScreen">
+        <div class="intro-wrapper">
+          <div class="intro-badge">
+            <span class="badge-dot"></span>
+            DIAGNÓSTICO ESTRATÉGICO
+          </div>
+          
+          <h1 class="main-title">
+            <span class="title-line">Onde sua</span>
+            <span class="title-line gradient-text">empresa</span>
+            <span class="title-line">está perdendo</span>
+            <span class="title-line accent-text">valor?</span>
+          </h1>
+          
+          <div class="title-divider"></div>
+          
+          <p class="desc">
+            Responda perguntas estratégicas e descubra oportunidades ocultas 
+            de <strong>crescimento</strong>, <strong>redução de custos</strong> 
+            e <strong>valorização</strong> para sua empresa.
+          </p>
+          
+          <div class="stats-grid">
+            <div class="stat-cell">
+              <div class="stat-icon">📊</div>
+              <div class="stat-num">5</div>
+              <div class="stat-label">Pilares analisados</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-icon">🎯</div>
+              <div class="stat-num">~20</div>
+              <div class="stat-label">Perguntas dinâmicas</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-icon">📈</div>
+              <div class="stat-num">Radar</div>
+              <div class="stat-label">Dashboard visual</div>
+            </div>
+            <div class="stat-cell">
+              <div class="stat-icon">🚀</div>
+              <div class="stat-num">Simulador</div>
+              <div class="stat-label">Projeções estratégicas</div>
+            </div>
+          </div>
+          
+          <button class="btn-primary" id="startBtn">
+            <span>INICIAR DIAGNÓSTICO</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+          
+          <div class="intro-footer">
+            <span>⏱️ ~5 minutos</span>
+            <span>🔒 Confidencial</span>
+            <span>🎯 Resultado imediato</span>
           </div>
         </div>
-      </div>
+      </section>
 
+      <!-- ======================================== -->
+      <!-- TELA 2: OBJETIVOS (ROOT)                 -->
+      <!-- ======================================== -->
+      <section class="screen" id="rootScreen">
+        <div class="q-card">
+          <div class="q-header">
+            <div class="q-header-left">
+              <span class="q-step">Passo 1</span>
+              <span class="q-index">01</span>
+            </div>
+            <div class="q-header-right">
+              <span class="q-text">Qual o principal objetivo da sua empresa?</span>
+              <span class="q-hint">Selecione todas as opções que se aplicam</span>
+            </div>
+          </div>
+          
+          <div class="options-group" id="rootOptions"></div>
+          
+          <div class="nav-buttons">
+            <button class="btn-secondary" id="rootBackBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              VOLTAR
+            </button>
+            <button class="btn-next" id="rootNextBtn">
+              AVANÇAR
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================== -->
+      <!-- TELA 3: PERGUNTAS DINÂMICAS              -->
+      <!-- ======================================== -->
       <div id="dynamicQuestions"></div>
 
-      <!-- RESULTADO -->
-      <div class="screen" id="resultScreen">
+      <!-- ======================================== -->
+      <!-- TELA 4: RESULTADO (DASHBOARD)            -->
+      <!-- ======================================== -->
+      <section class="screen" id="resultScreen">
         <div class="result-panel">
-          <div class="tag-accent" style="margin-bottom:8px;">📊 DASHBOARD · MATURIDADE</div>
-          <h2 style="font-family:'Bebas Neue';font-size:32px;line-height:1;flex-shrink:0;">M&A <span style="color:var(--accent);">READINESS</span></h2>
-          <div style="margin:8px 0 12px;height:2px;background:var(--border-dim);flex-shrink:0;"></div>
+          <!-- Cabeçalho do resultado -->
+          <div class="result-header">
+            <div class="result-header-left">
+              <div class="tag-accent">📊 DIAGNÓSTICO COMPLETO</div>
+              <h2 class="result-title">
+                M&A <span class="accent-text">READINESS</span>
+              </h2>
+            </div>
+            <div class="result-header-right">
+              <span class="result-score-label">Score Geral</span>
+              <span class="result-score-value" id="overallScore">--</span>
+            </div>
+          </div>
+          
+          <div class="result-divider"></div>
 
+          <!-- TABS -->
           <div class="tabs-container">
-            <button class="tab-btn active" data-tab="tab1">📊 Diagnóstico</button>
-            <button class="tab-btn" data-tab="tab2">📈 Simulador</button>
+            <button class="tab-btn active" data-tab="tab1">
+              <span class="tab-icon">📊</span>
+              Diagnóstico
+            </button>
+            <button class="tab-btn" data-tab="tab2">
+              <span class="tab-icon">📈</span>
+              Simulador
+            </button>
+            <button class="tab-btn" data-tab="tab3">
+              <span class="tab-icon">📋</span>
+              Relatório
+            </button>
           </div>
 
+          <!-- CONTEÚDO DAS TABS -->
           <div class="tab-content">
+            
+            <!-- TAB 1: DIAGNÓSTICO -->
             <div class="tab-pane active" id="tab1">
+              <!-- Gráficos -->
               <div class="dashboard-grid">
                 <div class="chart-box">
-                  <div class="chart-box-title">RADAR · 5 PILARES</div>
-                  <div class="chart-canvas-wrapper"><canvas id="radarChart"></canvas></div>
-                </div>
-                <div class="chart-box">
-                  <div class="chart-box-title">BARRAS · Score vs Benchmark</div>
-                  <div class="chart-canvas-wrapper"><canvas id="barChart"></canvas></div>
-                </div>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;flex-shrink:0;">
-                <div>
-                  <div class="metric-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin:0;">
-                    <div class="metric-card"><div class="metric-value" id="scoreValuation">--</div><div class="metric-label">Valuation</div></div>
-                    <div class="metric-card"><div class="metric-value" id="scoreGovernance">--</div><div class="metric-label">Governança</div></div>
-                    <div class="metric-card"><div class="metric-value" id="scoreFinance">--</div><div class="metric-label">Financeiro</div></div>
-                    <div class="metric-card"><div class="metric-value" id="scoreLegal">--</div><div class="metric-label">Jurídico</div></div>
-                    <div class="metric-card" style="grid-column:1/-1;"><div class="metric-value" id="scoreOperacional">--</div><div class="metric-label">Operacional</div></div>
+                  <div class="chart-box-title">
+                    <span>🎯 Radar · 5 Pilares</span>
+                    <span class="chart-badge">Maturidade</span>
+                  </div>
+                  <div class="chart-canvas-wrapper">
+                    <canvas id="radarChart"></canvas>
                   </div>
                 </div>
-                <div>
-                  <div style="font-size:13px;color:var(--white-dim);margin-bottom:4px;">🔍 Alertas por severidade</div>
+                <div class="chart-box">
+                  <div class="chart-box-title">
+                    <span>📊 Score vs Benchmark</span>
+                    <span class="chart-badge">Comparativo</span>
+                  </div>
+                  <div class="chart-canvas-wrapper">
+                    <canvas id="barChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Métricas e Alertas -->
+              <div class="metrics-alerts-grid">
+                <div class="metrics-container">
+                  <div class="metric-grid">
+                    <div class="metric-card">
+                      <div class="metric-value" id="scoreValuation">--</div>
+                      <div class="metric-label">Valuation</div>
+                      <div class="metric-bar"><div class="metric-bar-fill" id="barValuation"></div></div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value" id="scoreGovernance">--</div>
+                      <div class="metric-label">Governança</div>
+                      <div class="metric-bar"><div class="metric-bar-fill" id="barGovernance"></div></div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value" id="scoreFinance">--</div>
+                      <div class="metric-label">Financeiro</div>
+                      <div class="metric-bar"><div class="metric-bar-fill" id="barFinance"></div></div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-value" id="scoreLegal">--</div>
+                      <div class="metric-label">Jurídico</div>
+                      <div class="metric-bar"><div class="metric-bar-fill" id="barLegal"></div></div>
+                    </div>
+                    <div class="metric-card full-width">
+                      <div class="metric-value" id="scoreOperacional">--</div>
+                      <div class="metric-label">Operacional</div>
+                      <div class="metric-bar"><div class="metric-bar-fill" id="barOperacional"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="alerts-container">
+                  <div class="alerts-header">
+                    <span>🔍 Alertas por Severidade</span>
+                    <span class="alerts-count" id="alertCount">0</span>
+                  </div>
                   <div class="alert-scroll" id="alertContainer"></div>
                 </div>
               </div>
-              <div style="margin-top:16px;flex-shrink:0;">
-                <div style="font-size:13px;color:var(--white-dim);margin-bottom:4px;">📋 Checklist personalizado</div>
-                <div id="checklistContainer" style="display:flex;flex-wrap:wrap;gap:4px 12px;max-height:70px;overflow-y:auto;padding:4px 0;"></div>
+
+              <!-- Checklist -->
+              <div class="checklist-container">
+                <div class="checklist-header">
+                  <span>📋 Checklist Personalizado</span>
+                  <span class="checklist-hint">Prioridades identificadas</span>
+                </div>
+                <div id="checklistContainer"></div>
               </div>
             </div>
 
+            <!-- TAB 2: SIMULADOR -->
             <div class="tab-pane" id="tab2">
-              <div class="simulador-box" style="flex-shrink:0;margin-top:0;">
-                <h4 style="font-family:'Bebas Neue';font-size:22px;letter-spacing:1px;">📈 Simulador de impacto</h4>
-                <div class="slider-group"><label>Governança <span id="simGovLabel">+0%</span></label><input type="range" id="simGov" min="0" max="50" value="0" /></div>
-                <div class="slider-group"><label>Financeiro <span id="simFinLabel">+0%</span></label><input type="range" id="simFin" min="0" max="50" value="0" /></div>
-                <div class="slider-group"><label>Jurídico <span id="simLegLabel">+0%</span></label><input type="range" id="simLeg" min="0" max="50" value="0" /></div>
-                <div class="slider-group"><label>Operacional <span id="simOpLabel">+0%</span></label><input type="range" id="simOp" min="0" max="50" value="0" /></div>
-                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;">
-                  <span style="font-size:14px;color:var(--white-dim);">Valuation Readiness projetado:</span>
+              <div class="simulador-box">
+                <div class="simulador-header">
+                  <h4>📈 Simulador de Impacto</h4>
+                  <p class="simulador-sub">Ajuste os sliders e veja o potencial de valorização</p>
+                </div>
+                
+                <div class="slider-group">
+                  <label>
+                    <span class="slider-label">Governança</span>
+                    <span class="slider-value" id="simGovLabel">+0%</span>
+                  </label>
+                  <input type="range" id="simGov" min="0" max="50" value="0" />
+                </div>
+                
+                <div class="slider-group">
+                  <label>
+                    <span class="slider-label">Financeiro</span>
+                    <span class="slider-value" id="simFinLabel">+0%</span>
+                  </label>
+                  <input type="range" id="simFin" min="0" max="50" value="0" />
+                </div>
+                
+                <div class="slider-group">
+                  <label>
+                    <span class="slider-label">Jurídico</span>
+                    <span class="slider-value" id="simLegLabel">+0%</span>
+                  </label>
+                  <input type="range" id="simLeg" min="0" max="50" value="0" />
+                </div>
+                
+                <div class="slider-group">
+                  <label>
+                    <span class="slider-label">Operacional</span>
+                    <span class="slider-value" id="simOpLabel">+0%</span>
+                  </label>
+                  <input type="range" id="simOp" min="0" max="50" value="0" />
+                </div>
+
+                <div class="simulador-result">
+                  <span class="sim-result-label">Valuation Readiness projetado:</span>
                   <span class="sim-result" id="simResultValue">--</span>
                 </div>
               </div>
+
               <div class="sim-charts-grid">
                 <div class="sim-chart-box">
-                  <div class="chart-box-title" style="font-size:12px;">📈 Tendência Valuation (12-36m)</div>
-                  <div class="chart-canvas-wrapper"><canvas id="lineChart"></canvas></div>
+                  <div class="chart-box-title">📈 Tendência Valuation (12-36m)</div>
+                  <div class="chart-canvas-wrapper">
+                    <canvas id="lineChart"></canvas>
+                  </div>
                 </div>
                 <div class="sim-chart-box">
-                  <div class="chart-box-title" style="font-size:12px;">📊 Redução de Riscos (área)</div>
-                  <div class="chart-canvas-wrapper"><canvas id="areaChart"></canvas></div>
+                  <div class="chart-box-title">📊 Redução de Riscos</div>
+                  <div class="chart-canvas-wrapper">
+                    <canvas id="areaChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: RELATÓRIO -->
+            <div class="tab-pane" id="tab3">
+              <div class="report-container">
+                <div class="report-header">
+                  <div class="report-icon">📄</div>
+                  <div>
+                    <h3 class="report-title">Relatório de Oportunidades</h3>
+                    <p class="report-sub">Resumo executivo do diagnóstico da sua empresa</p>
+                  </div>
+                </div>
+
+                <div class="report-grid">
+                  <div class="report-card">
+                    <span class="report-card-icon">💡</span>
+                    <h4>Principais Oportunidades</h4>
+                    <div id="reportOpportunities"></div>
+                  </div>
+                  <div class="report-card">
+                    <span class="report-card-icon">⚠️</span>
+                    <h4>Pontos de Atenção</h4>
+                    <div id="reportWarnings"></div>
+                  </div>
+                  <div class="report-card full-width">
+                    <span class="report-card-icon">🎯</span>
+                    <h4>Recomendações Estratégicas</h4>
+                    <div id="reportRecommendations"></div>
+                  </div>
+                </div>
+
+                <div class="report-actions">
+                  <button class="btn-secondary" id="downloadPdfBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Baixar Relatório PDF
+                  </button>
+                  <button class="btn-primary" id="contactBtn">
+                    Falar com Especialista
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
+          <!-- FOOTER DO DASHBOARD -->
           <div class="dashboard-footer">
-            <button id="restartBtn" style="background:none;border:1px solid var(--border-med);color:var(--white-muted);padding:8px 28px;font-size:12px;cursor:pointer;transition:0.2s;border-radius:4px;">↻ Novo diagnóstico</button>
+            <button id="restartBtn" class="btn-restart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              Novo diagnóstico
+            </button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+    </main>
   </div>
 
+  <!-- ============================================ -->
+  <!-- SCRIPTS                                      -->
+  <!-- ============================================ -->
   <script src="js/database.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/app.js"></script>
