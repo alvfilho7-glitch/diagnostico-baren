@@ -626,6 +626,70 @@ function makeChartResponsive(chartInstance, options = {}) {
 }
 
 // ============================================================
+// 11. GRÁFICO DE DONUT (OPCIONAL)
+// ============================================================
+
+/**
+ * Cria um gráfico de donut
+ * @param {string|HTMLCanvasElement} canvasId - ID do canvas ou elemento
+ * @param {Object} data - Dados do gráfico
+ * @param {Object} options - Opções de configuração
+ * @returns {Chart} Instância do Chart.js
+ */
+function createDonutChart(canvasId, data, options = {}) {
+  const canvas = typeof canvasId === 'string' ? document.getElementById(canvasId) : canvasId;
+  if (!canvas) return null;
+  
+  const defaultColors = {
+    text: '#F8F4EF'
+  };
+  
+  const config = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: options.legendPosition || 'bottom',
+        labels: {
+          color: defaultColors.text,
+          font: { size: options.legendFontSize || 10 }
+        }
+      }
+    },
+    cutout: options.cutout || '70%',
+    ...options
+  };
+  
+  return new Chart(canvas, {
+    type: 'doughnut',
+    data: data,
+    options: config
+  });
+}
+
+/**
+ * Prepara os dados para o gráfico de donut
+ * @param {Object} scores - Scores por pilar
+ * @param {Array} labels - Labels dos pilares
+ * @returns {Object} Dados formatados para o Chart.js
+ */
+function prepareDonutData(scores, labels) {
+  const data = labels.map(label => scores[label.toLowerCase()] || 0);
+  const colors = data.map(v => getScoreColor(v, 'hex'));
+  const borderColors = data.map(v => getScoreColor(v, 'hex'));
+  
+  return {
+    labels: labels,
+    datasets: [{
+      data: data,
+      backgroundColor: colors.map(c => c + '80'), // com transparência
+      borderColor: colors,
+      borderWidth: 2
+    }]
+  };
+}
+
+// ============================================================
 // EXPORTAÇÃO (para uso em outros arquivos)
 // ============================================================
 // Funções disponíveis no escopo global
@@ -648,6 +712,8 @@ if (typeof module !== 'undefined' && module.exports) {
     exportChartImage,
     downloadChartImage,
     animateGauge,
-    makeChartResponsive
+    makeChartResponsive,
+    createDonutChart,
+    prepareDonutData
   };
 }
