@@ -1,6 +1,6 @@
 // ============================================================
 // js/app.js
-// LÓGICA PRINCIPAL DO SISTEMA
+// LÓGICA PRINCIPAL DO SISTEMA - RENDERIZA TODO O CONTEÚDO
 // ============================================================
 
 // ============================================================
@@ -95,7 +95,539 @@ function renderPageContent(page) {
 }
 
 // ============================================================
-// 3. OBJETIVOS
+// 3. NAVEGAÇÃO - RENDERIZA OS BOTÕES
+// ============================================================
+
+/**
+ * Renderiza os botões de navegação
+ */
+function renderNavigation() {
+  const container = document.getElementById('navContainer');
+  const pages = [
+    { id: 1, label: 'Home' },
+    { id: 2, label: 'Objetivos' },
+    { id: 3, label: 'Gov+Fin' },
+    { id: 4, label: 'Jur+Op' },
+    { id: 5, label: 'Estrat+Pess' },
+    { id: 6, label: 'Visão Geral' },
+    { id: 7, label: 'Alertas' },
+    { id: '7b', label: 'Oportunidades' },
+    { id: 8, label: 'Simulador' },
+    { id: 9, label: 'Plano Ação' },
+    { id: 10, label: 'Relatório' }
+  ];
+  
+  let html = '';
+  pages.forEach((p, index) => {
+    const active = index === 0 ? 'active' : '';
+    html += `
+      <button class="step ${active}" data-page="${p.id}" onclick="goToPage('${p.id}')">
+        <span class="num">${index + 1}</span>
+        <span class="label">${p.label}</span>
+      </button>
+    `;
+    if (index < pages.length - 1) {
+      html += `<span class="step-divider">/</span>`;
+    }
+  });
+  
+  container.innerHTML = html;
+}
+
+// ============================================================
+// 4. PÁGINAS - RENDERIZAÇÃO
+// ============================================================
+
+/**
+ * Renderiza todas as páginas no main content
+ */
+function renderAllPages() {
+  const container = document.getElementById('mainContent');
+  
+  const pages = {
+    1: renderPage1,
+    2: renderPage2,
+    3: renderPage3,
+    4: renderPage4,
+    5: renderPage5,
+    6: renderPage6,
+    7: renderPage7,
+    '7b': renderPage7b,
+    8: renderPage8,
+    9: renderPage9,
+    10: renderPage10
+  };
+  
+  let html = '';
+  Object.keys(pages).forEach(key => {
+    const pageHtml = pages[key]();
+    html += pageHtml;
+  });
+  
+  container.innerHTML = html;
+  
+  // Ativa a primeira página
+  document.querySelector('.page')?.classList.add('active');
+}
+
+// ============================================================
+// 5. PÁGINA 1 - HOME
+// ============================================================
+function renderPage1() {
+  return `
+    <div class="page" id="page1">
+      <div class="container">
+        <div style="max-width: 720px; margin: 0 auto;">
+          <span class="hero-badge">⚡ M&A Readiness Intelligence Hub</span>
+          <h1 class="page-title">
+            Onde sua empresa <br /><em>está perdendo valor?</em>
+          </h1>
+          <p class="page-subtitle">
+            Descubra o nível de preparação da sua empresa para fusões, aquisições
+            e captação de investimentos. <strong>Diagnóstico gratuito</strong> em 5 minutos.
+          </p>
+
+          <div class="hero-metric">
+            <span class="number">40%</span>
+            <span class="text">das empresas perdem valor por falta de preparação estratégica</span>
+          </div>
+
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <span class="icon">📊</span>
+              <span class="text"><strong>Score Geral</strong><br />M&A Readiness 0-100%</span>
+            </div>
+            <div class="benefit-item">
+              <span class="icon">🎯</span>
+              <span class="text"><strong>6 Pilares</strong><br />Análise completa da empresa</span>
+            </div>
+            <div class="benefit-item">
+              <span class="icon">📈</span>
+              <span class="text"><strong>Projeção</strong><br />Impacto no valuation</span>
+            </div>
+            <div class="benefit-item">
+              <span class="icon">🔍</span>
+              <span class="text"><strong>Alertas</strong><br />50+ pontos críticos</span>
+            </div>
+            <div class="benefit-item">
+              <span class="icon">📋</span>
+              <span class="text"><strong>Plano de Ação</strong><br />30+ ações concretas</span>
+            </div>
+            <div class="benefit-item">
+              <span class="icon">🤝</span>
+              <span class="text"><strong>Parceiros</strong><br />Matchmaking inteligente</span>
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="goToPage(2)" style="font-size:11px; padding:14px 40px;">
+            Iniciar Diagnóstico
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 6. PÁGINA 2 - OBJETIVOS
+// ============================================================
+function renderPage2() {
+  const objectives = [
+    { value: 'A', icon: '🏛️', label: 'Venda total ou parcial' },
+    { value: 'B', icon: '💰', label: 'Captação de investimento' },
+    { value: 'C', icon: '📈', label: 'Crescimento e expansão' },
+    { value: 'D', icon: '⚙️', label: 'Profissionalização da gestão' },
+    { value: 'E', icon: '📋', label: 'Reestruturação tributária' },
+    { value: 'F', icon: '🔧', label: 'Redução de custos' },
+    { value: 'G', icon: '👨‍👩‍👧‍👦', label: 'Sucessão familiar' },
+    { value: 'H', icon: '🌍', label: 'Internacionalização' },
+    { value: 'I', icon: '⭐', label: 'Melhorar rating de crédito' },
+    { value: 'J', icon: '🎯', label: 'Planejamento estratégico' }
+  ];
+  
+  let objectivesHtml = objectives.map(obj => `
+    <div class="obj-card" data-value="${obj.value}" onclick="toggleObjective(this)">
+      <span class="icon">${obj.icon}</span>
+      <span class="label">${obj.label}</span>
+      <span class="check"></span>
+    </div>
+  `).join('');
+  
+  return `
+    <div class="page" id="page2">
+      <div class="container">
+        <div style="max-width: 780px; margin: 0 auto;">
+          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Qual o <em>principal objetivo</em> da sua empresa?</span>
+          <p class="page-subtitle">Selecione todas as opções que se aplicam ao momento atual da sua empresa.</p>
+
+          <div class="objectives-grid" id="objectivesGrid">
+            ${objectivesHtml}
+          </div>
+
+          <div class="page-footer">
+            <button class="btn-secondary" onclick="goToPage(1)">← Voltar</button>
+            <button class="btn-primary" onclick="goToPage(3)">Continuar →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 7. PÁGINA 3 - PERGUNTAS PARTE 1
+// ============================================================
+function renderPage3() {
+  return `
+    <div class="page" id="page3">
+      <div class="container">
+        <div style="max-width: 720px; margin: 0 auto;">
+          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 1/3</em></span>
+          <p class="page-subtitle">Responda sobre <strong>Governança e Financeiro</strong> da sua empresa.</p>
+
+          <div id="questions1" class="question-card">
+            <!-- As perguntas serão geradas via JavaScript -->
+          </div>
+
+          <div class="page-footer">
+            <button class="btn-secondary" onclick="goToPage(2)">← Voltar</button>
+            <button class="btn-primary" onclick="goToPage(4)">Próxima Parte →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 8. PÁGINA 4 - PERGUNTAS PARTE 2
+// ============================================================
+function renderPage4() {
+  return `
+    <div class="page" id="page4">
+      <div class="container">
+        <div style="max-width: 720px; margin: 0 auto;">
+          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 2/3</em></span>
+          <p class="page-subtitle">Responda sobre <strong>Jurídico e Operacional</strong> da sua empresa.</p>
+
+          <div id="questions2" class="question-card">
+            <!-- As perguntas serão geradas via JavaScript -->
+          </div>
+
+          <div class="page-footer">
+            <button class="btn-secondary" onclick="goToPage(3)">← Voltar</button>
+            <button class="btn-primary" onclick="goToPage(5)">Próxima Parte →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 9. PÁGINA 5 - PERGUNTAS PARTE 3
+// ============================================================
+function renderPage5() {
+  return `
+    <div class="page" id="page5">
+      <div class="container">
+        <div style="max-width: 720px; margin: 0 auto;">
+          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 3/3</em></span>
+          <p class="page-subtitle">Responda sobre <strong>Estratégia e Pessoas</strong> da sua empresa.</p>
+
+          <div id="questions3" class="question-card">
+            <!-- As perguntas serão geradas via JavaScript -->
+          </div>
+
+          <div class="page-footer">
+            <button class="btn-secondary" onclick="goToPage(4)">← Voltar</button>
+            <button class="btn-primary" onclick="goToPage(6)">Ver Resultados →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 10. PÁGINA 6 - DASHBOARD
+// ============================================================
+function renderPage6() {
+  const pillars = [
+    { key: 'governance', name: 'Governança', svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' },
+    { key: 'finance', name: 'Financeiro', svg: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/>' },
+    { key: 'legal', name: 'Jurídico', svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>' },
+    { key: 'operational', name: 'Operacional', svg: '<path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/>' },
+    { key: 'strategy', name: 'Estratégia', svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' },
+    { key: 'people', name: 'Pessoas', svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' }
+  ];
+  
+  let pillarsHtml = pillars.map(p => `
+    <div class="pillar-card">
+      <svg class="icon-svg" viewBox="0 0 24 24">${p.svg}</svg>
+      <div class="name">${p.name}</div>
+      <div class="score" id="score${p.key.charAt(0).toUpperCase() + p.key.slice(1)}">--</div>
+      <div class="bar"><div class="fill" id="bar${p.key.charAt(0).toUpperCase() + p.key.slice(1)}" style="width:0%;"></div></div>
+    </div>
+  `).join('');
+  
+  return `
+    <div class="page" id="page6">
+      <div class="container">
+        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Visão <em>Geral</em></span>
+        <p class="page-subtitle">Resumo do nível de preparação da sua empresa para M&A.</p>
+
+        <div class="overall-score" id="overallScore">
+          <div class="gauge-container" id="gaugeContainer">
+            <canvas id="gaugeCanvas"></canvas>
+            <div class="gauge-center">
+              <span class="value" id="mainScore">--</span>
+              <span class="label">Readiness</span>
+            </div>
+          </div>
+          <div class="overall-info">
+            <div class="title">M&A Readiness</div>
+            <span class="risk" id="riskBadge">Aguardando respostas</span>
+            <p class="diagnostic" id="diagnosticText">
+              Responda todas as perguntas para gerar seu diagnóstico estratégico.
+            </p>
+          </div>
+        </div>
+
+        <div class="pillar-scores" id="pillarScores">
+          ${pillarsHtml}
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-container">
+            <div class="chart-title">📊 Maturidade por Sub-pilar</div>
+            <canvas id="subPillarChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <div class="chart-title">📈 Valuation Projetado vs. Potencial</div>
+            <canvas id="valuationChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-container" style="height:300px; margin-bottom:16px;">
+          <div class="chart-title">🎯 Radar de Maturidade vs. Benchmark</div>
+          <canvas id="radarChart"></canvas>
+        </div>
+
+        <div class="page-footer">
+          <button class="btn-secondary" onclick="goToPage(5)">← Voltar</button>
+          <button class="btn-primary" onclick="goToPage(7)">Ver Alertas →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 11. PÁGINA 7 - ALERTAS
+// ============================================================
+function renderPage7() {
+  return `
+    <div class="page" id="page7">
+      <div class="container">
+        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Alertas por <em>Severidade</em></span>
+        <p class="page-subtitle">Clique em cada alerta para ver o plano de ação detalhado.</p>
+
+        <div class="alerts-list" id="alertsList">
+          <div class="alert-item" style="text-align:center; padding:40px; color:var(--cream-faint); border-left-color:transparent;">
+            Responda todas as perguntas para gerar os alertas.
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <button class="btn-secondary" onclick="goToPage(6)">← Voltar</button>
+          <button class="btn-primary" onclick="goToPage('7b')">Ver Oportunidades →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 12. PÁGINA 7B - OPORTUNIDADES
+// ============================================================
+function renderPage7b() {
+  return `
+    <div class="page" id="page7b">
+      <div class="container">
+        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Soluções <em>Recomendadas</em></span>
+        <p class="page-subtitle">Serviços e parceiros estratégicos para acelerar sua prontidão.</p>
+
+        <div class="opportunities-grid" id="opportunitiesGrid">
+          <!-- Gerado via JavaScript -->
+        </div>
+
+        <div class="page-footer">
+          <button class="btn-secondary" onclick="goToPage(7)">← Voltar</button>
+          <button class="btn-primary" onclick="goToPage(8)">Ir para Simulador →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 13. PÁGINA 8 - SIMULADOR
+// ============================================================
+function renderPage8() {
+  return `
+    <div class="page" id="page8">
+      <div class="container">
+        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Calculador de <em>Ganho de Valuation</em></span>
+        <p class="page-subtitle">Selecione as ações que sua empresa pode implementar e veja o impacto financeiro.</p>
+
+        <div class="simulator-grid">
+          <div class="sim-actions" id="simActions">
+            <div class="section-title">📋 Ações Recomendadas</div>
+            <!-- Gerado via JavaScript -->
+          </div>
+
+          <div class="sim-results-panel" id="simResultsPanel">
+            <div class="section-title">📈 Retorno sobre o Investimento</div>
+            
+            <div class="mini-gauge">
+              <span style="font-size:11px; color:var(--cream-dim); min-width:100px;">M&A Readiness</span>
+              <div class="track">
+                <div class="fill" id="simGaugeFill" style="width:0%;"></div>
+                <div class="benchmark-line" id="simBenchmarkLine" style="left:60%;"></div>
+              </div>
+              <span class="label" id="simGaugeLabel">0%</span>
+            </div>
+
+            <div class="sim-metric">
+              <span class="label">Múltiplo de EBITDA Adicional</span>
+              <span class="value" id="simMultiple">0.0x</span>
+            </div>
+            <div class="sim-metric">
+              <span class="label">Redução de Desconto de Risco</span>
+              <span class="value green" id="simRiskReduction">-0%</span>
+            </div>
+            <div class="sim-metric">
+              <span class="label">Tempo de Due Diligence</span>
+              <span class="value" id="simTimeToMarket">12 meses</span>
+            </div>
+            <div class="sim-metric">
+              <span class="label">Atratividade do Comprador</span>
+              <span class="value" style="font-size:14px; font-family:'Inter',sans-serif; font-weight:500;" id="simBuyerProfile">⚠️ Restrita</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <button class="btn-secondary" onclick="goToPage('7b')">← Voltar</button>
+          <button class="btn-primary" onclick="goToPage(9)">Ver Plano de Ação →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 14. PÁGINA 9 - PLANO DE AÇÃO
+// ============================================================
+function renderPage9() {
+  return `
+    <div class="page" id="page9">
+      <div class="container">
+        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Plano de <em>Ação Personalizado</em></span>
+        <p class="page-subtitle">Ações priorizadas com base no seu diagnóstico. As tarefas já pré-selecionadas vieram do simulador.</p>
+
+        <div class="action-groups" id="actionGroups">
+          <!-- Gerado via JavaScript -->
+        </div>
+
+        <div class="page-footer">
+          <button class="btn-secondary" onclick="goToPage(8)">← Voltar</button>
+          <button class="btn-primary" onclick="goToPage(10)">Ver Relatório →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 15. PÁGINA 10 - RELATÓRIO
+// ============================================================
+function renderPage10() {
+  return `
+    <div class="page" id="page10">
+      <div class="container">
+        <div class="report-container" id="reportContainer">
+          <div class="report-header">
+            <div class="left">
+              <div class="sub">M&A Readiness Intelligence Hub</div>
+              <div class="title">Relatório <em>Executivo</em></div>
+              <div class="sub" style="margin-top:2px;">BAREN · Diagnóstico Estratégico</div>
+            </div>
+            <div class="right">
+              <div class="score-number" id="reportScoreNumber">--</div>
+              <div class="score-label">M&A Readiness</div>
+            </div>
+          </div>
+
+          <div class="report-body">
+            <div class="report-grid">
+              <div class="report-card full-width" style="height:260px; padding:12px 16px;">
+                <div class="card-title">🎯 Radar de Maturidade</div>
+                <div style="height:200px;">
+                  <canvas id="reportRadarChart"></canvas>
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="card-title">📊 Diagnóstico</div>
+                <div class="card-content" id="reportDiagnostic">
+                  Aguardando dados
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="card-title">💰 Impacto no Valuation</div>
+                <div class="card-content" id="reportValuationImpact">
+                  Aguardando dados
+                </div>
+              </div>
+
+              <div class="report-card full-width">
+                <div class="card-title">🗓️ Roadmap de Prontidão</div>
+                <div class="report-roadmap" id="reportRoadmap">
+                  <!-- Gerado via JavaScript -->
+                </div>
+              </div>
+
+              <div class="report-card full-width">
+                <div class="card-title">🤝 Soluções Recomendadas</div>
+                <div class="card-content" id="reportSolutions">
+                  Aguardando dados
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-footer">
+            <button class="btn-secondary" onclick="goToPage(9)">← Voltar</button>
+            <button class="btn-primary" onclick="generatePDF()">
+              📄 Baixar Relatório PDF
+            </button>
+            <button class="btn-secondary" onclick="goToPage(1)">Novo Diagnóstico</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// 16. OBJETIVOS - FUNÇÃO TOGGLE
 // ============================================================
 
 /**
@@ -115,7 +647,7 @@ function toggleObjective(el) {
 }
 
 // ============================================================
-// 4. PERGUNTAS
+// 17. PERGUNTAS - RENDERIZAÇÃO E SELEÇÃO
 // ============================================================
 
 /**
@@ -170,7 +702,7 @@ function selectOption(el, qid, idx) {
 }
 
 // ============================================================
-// 5. DASHBOARD
+// 18. DASHBOARD - CÁLCULO DE SCORES
 // ============================================================
 
 /**
@@ -224,6 +756,19 @@ function getSubPillarData() {
 }
 
 /**
+ * Retorna o índice máximo de uma pergunta
+ * @param {string} qid - ID da pergunta
+ * @returns {number} Índice máximo
+ */
+function getMaxOptionIndex(qid) {
+  return (QUESTIONS[qid]?.options?.length || 1) - 1;
+}
+
+// ============================================================
+// 19. DASHBOARD - RENDERIZAÇÃO
+// ============================================================
+
+/**
  * Renderiza o dashboard completo
  */
 function renderDashboard() {
@@ -245,7 +790,7 @@ function renderDashboard() {
   updatePillarScores(scoresResult);
   
   // Desenha o velocímetro
-  drawGauge(overallRounded);
+  drawGauge('gaugeCanvas', overallRounded);
   
   // Renderiza gráficos
   renderCharts(scoresResult, subData, overallRounded);
@@ -289,23 +834,25 @@ function updateRiskBadge(score) {
  */
 function updatePillarScores(scoresResult) {
   const pillarMap = {
-    governance: { score: 'scoreGov', bar: 'barGov' },
-    finance: { score: 'scoreFin', bar: 'barFin' },
-    legal: { score: 'scoreJur', bar: 'barJur' },
-    operational: { score: 'scoreOp', bar: 'barOp' },
-    strategy: { score: 'scoreEstrat', bar: 'barEstrat' },
-    people: { score: 'scorePessoas', bar: 'barPessoas' }
+    governance: { score: 'scoreGovernance', bar: 'barGovernance' },
+    finance: { score: 'scoreFinance', bar: 'barFinance' },
+    legal: { score: 'scoreLegal', bar: 'barLegal' },
+    operational: { score: 'scoreOperational', bar: 'barOperational' },
+    strategy: { score: 'scoreStrategy', bar: 'barStrategy' },
+    people: { score: 'scorePeople', bar: 'barPeople' }
   };
   
   Object.keys(pillarMap).forEach(key => {
     const val = scoresResult[key] || 0;
-    document.getElementById(pillarMap[key].score).textContent = val + '%';
-    document.getElementById(pillarMap[key].bar).style.width = val + '%';
+    const scoreEl = document.getElementById(pillarMap[key].score);
+    const barEl = document.getElementById(pillarMap[key].bar);
+    if (scoreEl) scoreEl.textContent = val + '%';
+    if (barEl) barEl.style.width = val + '%';
   });
 }
 
 // ============================================================
-// 6. GRÁFICOS (Charts.js)
+// 20. GRÁFICOS (Charts.js)
 // ============================================================
 
 /**
@@ -347,7 +894,7 @@ function renderRadarChart(scoresResult) {
     scoresResult.strategy || 0,
     scoresResult.people || 0
   ];
-  const benchmark = getBenchmarkData();
+  const benchmark = [65, 55, 70, 50, 60, 55];
   
   state.chartInstances.radar = new Chart(ctx, {
     type: 'radar',
@@ -414,16 +961,6 @@ function renderSubPillarChart(subData) {
   
   const subLabels = Object.keys(subData);
   const subValues = Object.values(subData);
-  const colors = subValues.map(v => {
-    if (v >= 70) return 'rgba(0,230,118,0.7)';
-    if (v >= 40) return 'rgba(255,145,0,0.7)';
-    return 'rgba(255,23,68,0.7)';
-  });
-  const borderColors = subValues.map(v => {
-    if (v >= 70) return '#00e676';
-    if (v >= 40) return '#ff9100';
-    return '#ff1744';
-  });
   
   state.chartInstances.subPillar = new Chart(ctx, {
     type: 'bar',
@@ -432,8 +969,16 @@ function renderSubPillarChart(subData) {
       datasets: [{
         label: 'Maturidade %',
         data: subValues.slice(0, 12),
-        backgroundColor: colors.slice(0, 12),
-        borderColor: borderColors.slice(0, 12),
+        backgroundColor: subValues.slice(0, 12).map(v => {
+          if (v >= 70) return 'rgba(0,230,118,0.7)';
+          if (v >= 40) return 'rgba(255,145,0,0.7)';
+          return 'rgba(255,23,68,0.7)';
+        }),
+        borderColor: subValues.slice(0, 12).map(v => {
+          if (v >= 70) return '#00e676';
+          if (v >= 40) return '#ff9100';
+          return '#ff1744';
+        }),
         borderWidth: 1,
         borderRadius: 2
       }]
@@ -469,7 +1014,7 @@ function renderValuationChart(currentScore) {
     state.chartInstances.valuation.destroy();
   }
   
-  const potentialScore = Math.min(CONFIG.maxPotentialScore, currentScore + 40);
+  const potentialScore = Math.min(95, currentScore + 40);
   
   state.chartInstances.valuation = new Chart(ctx, {
     type: 'line',
@@ -523,93 +1068,7 @@ function renderValuationChart(currentScore) {
 }
 
 // ============================================================
-// 7. VELOCÍMETRO (GAUGE)
-// ============================================================
-
-/**
- * Desenha o velocímetro no canvas
- * @param {number} value - Valor percentual (0-100)
- */
-function drawGauge(value) {
-  const canvas = document.getElementById('gaugeCanvas');
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext('2d');
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const size = Math.min(rect.width || 140, 140);
-  
-  canvas.width = size * 2;
-  canvas.height = size * 2;
-  canvas.style.width = size + 'px';
-  canvas.style.height = size + 'px';
-  
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2 + 10;
-  const radius = canvas.width / 2 - 20;
-  const startAngle = Math.PI * 0.75;
-  const endAngle = Math.PI * 2.25;
-  const totalAngle = endAngle - startAngle;
-  const currentAngle = startAngle + (value / 100) * totalAngle;
-  
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Fundo do arco
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, startAngle, endAngle);
-  ctx.strokeStyle = 'rgba(248,244,239,0.08)';
-  ctx.lineWidth = 14;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  
-  // Arco colorido (gradiente)
-  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  gradient.addColorStop(0, '#ff1744');
-  gradient.addColorStop(0.4, '#ff9100');
-  gradient.addColorStop(0.7, '#ffea00');
-  gradient.addColorStop(1, '#00e676');
-  
-  ctx.beginPath();
-  ctx.arc(cx, cy, radius, startAngle, currentAngle);
-  ctx.strokeStyle = gradient;
-  ctx.lineWidth = 14;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  
-  // Ponto indicador
-  const dotAngle = currentAngle;
-  const dotX = cx + (radius - 6) * Math.cos(dotAngle);
-  const dotY = cy + (radius - 6) * Math.sin(dotAngle);
-  
-  ctx.beginPath();
-  ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
-  ctx.fillStyle = '#E8621A';
-  ctx.fill();
-  ctx.shadowColor = 'rgba(232,98,26,0.4)';
-  ctx.shadowBlur = 12;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  
-  // Marcas de referência
-  for (let i = 0; i <= 10; i++) {
-    const angle = startAngle + (i / 10) * totalAngle;
-    const isMain = i % 5 === 0;
-    const len = isMain ? 12 : 6;
-    const x1 = cx + (radius - 4) * Math.cos(angle);
-    const y1 = cy + (radius - 4) * Math.sin(angle);
-    const x2 = cx + (radius - 4 - len) * Math.cos(angle);
-    const y2 = cy + (radius - 4 - len) * Math.sin(angle);
-    
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = i / 10 <= value / 100 ? 'rgba(232,98,26,0.6)' : 'rgba(248,244,239,0.2)';
-    ctx.lineWidth = isMain ? 2 : 1;
-    ctx.stroke();
-  }
-}
-
-// ============================================================
-// 8. ALERTAS
+// 21. ALERTAS
 // ============================================================
 
 /**
@@ -770,7 +1229,7 @@ function generateAlerts() {
 }
 
 // ============================================================
-// 9. OPORTUNIDADES
+// 22. OPORTUNIDADES
 // ============================================================
 
 /**
@@ -822,7 +1281,7 @@ function generateSolutions() {
 }
 
 // ============================================================
-// 10. SIMULADOR
+// 23. SIMULADOR
 // ============================================================
 
 /**
@@ -976,34 +1435,41 @@ function updateSimulator() {
   // Atualiza gauge
   const gaugeFill = document.getElementById('simGaugeFill');
   const gaugeLabel = document.getElementById('simGaugeLabel');
-  gaugeFill.style.width = projected + '%';
-  gaugeLabel.textContent = projected + '%';
+  if (gaugeFill) gaugeFill.style.width = projected + '%';
+  if (gaugeLabel) gaugeLabel.textContent = projected + '%';
   
   // Benchmark line
-  document.getElementById('simBenchmarkLine').style.left = CONFIG.benchmarkLine + '%';
+  const benchmarkLine = document.getElementById('simBenchmarkLine');
+  if (benchmarkLine) benchmarkLine.style.left = '60%';
   
   // Métricas
-  document.getElementById('simMultiple').textContent = '+' + totalMultiple.toFixed(1) + 'x';
-  document.getElementById('simRiskReduction').textContent = '-' + Math.round(totalRiskReduction) + '%';
+  const multipleEl = document.getElementById('simMultiple');
+  const riskEl = document.getElementById('simRiskReduction');
+  const timeEl = document.getElementById('simTimeToMarket');
+  const profileEl = document.getElementById('simBuyerProfile');
   
-  const newTime = Math.max(4, CONFIG.baseTimeToMarket - totalTimeReduction);
-  document.getElementById('simTimeToMarket').textContent = newTime + ' meses';
+  if (multipleEl) multipleEl.textContent = '+' + totalMultiple.toFixed(1) + 'x';
+  if (riskEl) riskEl.textContent = '-' + Math.round(totalRiskReduction) + '%';
+  
+  const newTime = Math.max(4, 14 - totalTimeReduction);
+  if (timeEl) timeEl.textContent = newTime + ' meses';
   
   // Perfil do comprador
-  const profile = document.getElementById('simBuyerProfile');
-  if (projected >= 80) {
-    profile.textContent = '🚀 Fundos de Private Equity e Players Estratégicos';
-  } else if (projected >= 60) {
-    profile.textContent = '🏢 Compradores Nacionais e Regionais';
-  } else if (projected >= 40) {
-    profile.textContent = '⚠️ Compradores Oportunistas e Locais';
-  } else {
-    profile.textContent = '❌ Atratividade Muito Restrita';
+  if (profileEl) {
+    if (projected >= 80) {
+      profileEl.textContent = '🚀 Fundos de Private Equity e Players Estratégicos';
+    } else if (projected >= 60) {
+      profileEl.textContent = '🏢 Compradores Nacionais e Regionais';
+    } else if (projected >= 40) {
+      profileEl.textContent = '⚠️ Compradores Oportunistas e Locais';
+    } else {
+      profileEl.textContent = '❌ Atratividade Muito Restrita';
+    }
   }
 }
 
 // ============================================================
-// 11. PLANO DE AÇÃO
+// 24. PLANO DE AÇÃO
 // ============================================================
 
 /**
@@ -1014,12 +1480,12 @@ function renderActions() {
   const s = state.scores;
   
   const pillars = {
-    'Governança': { key: 'governance', actions: getActionsForPillar('governance') },
-    'Financeiro': { key: 'finance', actions: getActionsForPillar('finance') },
-    'Jurídico': { key: 'legal', actions: getActionsForPillar('legal') },
-    'Operacional': { key: 'operational', actions: getActionsForPillar('operational') },
-    'Estratégia': { key: 'strategy', actions: getActionsForPillar('strategy') },
-    'Pessoas': { key: 'people', actions: getActionsForPillar('people') }
+    'Governança': { key: 'governance', actions: ACTION_MAP.governance || [] },
+    'Financeiro': { key: 'finance', actions: ACTION_MAP.finance || [] },
+    'Jurídico': { key: 'legal', actions: ACTION_MAP.legal || [] },
+    'Operacional': { key: 'operational', actions: ACTION_MAP.operational || [] },
+    'Estratégia': { key: 'strategy', actions: ACTION_MAP.strategy || [] },
+    'Pessoas': { key: 'people', actions: ACTION_MAP.people || [] }
   };
   
   let html = '';
@@ -1081,7 +1547,7 @@ function renderActions() {
 }
 
 // ============================================================
-// 12. RELATÓRIO
+// 25. RELATÓRIO
 // ============================================================
 
 /**
@@ -1093,7 +1559,8 @@ function renderReport() {
   const overallRounded = Math.round(overall);
   
   // Score principal
-  document.getElementById('reportScoreNumber').textContent = overallRounded + '%';
+  const scoreEl = document.getElementById('reportScoreNumber');
+  if (scoreEl) scoreEl.textContent = overallRounded + '%';
   
   // Diagnóstico
   renderReportDiagnostic(overallRounded);
@@ -1116,6 +1583,9 @@ function renderReport() {
  * @param {number} score - Score geral
  */
 function renderReportDiagnostic(score) {
+  const el = document.getElementById('reportDiagnostic');
+  if (!el) return;
+  
   let msg = '';
   if (score >= 80) {
     msg = 'Sua empresa está <span class="highlight">bem posicionada</span> para M&A. Fundos de Private Equity e compradores estratégicos demonstram interesse.';
@@ -1126,7 +1596,7 @@ function renderReportDiagnostic(score) {
   } else {
     msg = 'Sem governança e finanças organizadas, a venda ou captação se torna <span class="highlight">inviável</span>. Ação imediata necessária.';
   }
-  document.getElementById('reportDiagnostic').innerHTML = msg;
+  el.innerHTML = msg;
 }
 
 /**
@@ -1134,10 +1604,13 @@ function renderReportDiagnostic(score) {
  * @param {number} currentScore - Score atual
  */
 function renderReportValuationImpact(currentScore) {
-  const potential = Math.min(CONFIG.maxPotentialScore, currentScore + 40);
+  const el = document.getElementById('reportValuationImpact');
+  if (!el) return;
+  
+  const potential = Math.min(95, currentScore + 40);
   const gain = potential - currentScore;
   
-  document.getElementById('reportValuationImpact').innerHTML = `
+  el.innerHTML = `
     <div><strong>Atual:</strong> ${currentScore}% de prontidão</div>
     <div><strong>Potencial:</strong> ${potential}% com ações corretivas</div>
     <div style="margin-top:6px; color:var(--gold);">📈 Ganho estimado: <strong>+${gain}%</strong> em múltiplo de EBITDA</div>
@@ -1150,6 +1623,9 @@ function renderReportValuationImpact(currentScore) {
  * @param {Object} scores - Scores por pilar
  */
 function renderReportRoadmap(scores) {
+  const el = document.getElementById('reportRoadmap');
+  if (!el) return;
+  
   const html = `
     <div class="phase urgent">
       <div class="phase-title">🔴 Urgente (30 dias)</div>
@@ -1178,13 +1654,16 @@ function renderReportRoadmap(scores) {
       </div>
     </div>
   `;
-  document.getElementById('reportRoadmap').innerHTML = html;
+  el.innerHTML = html;
 }
 
 /**
  * Renderiza as soluções recomendadas no relatório
  */
 function renderReportSolutions() {
+  const el = document.getElementById('reportSolutions');
+  if (!el) return;
+  
   const solutions = generateSolutions();
   let html = '<ul>';
   
@@ -1197,7 +1676,7 @@ function renderReportSolutions() {
   }
   
   html += '</ul>';
-  document.getElementById('reportSolutions').innerHTML = html;
+  el.innerHTML = html;
 }
 
 /**
@@ -1221,7 +1700,7 @@ function renderReportRadar(scores) {
     scores.strategy || 0,
     scores.people || 0
   ];
-  const benchmark = getBenchmarkData();
+  const benchmark = [65, 55, 70, 50, 60, 55];
   
   state.chartInstances.reportRadar = new Chart(ctx, {
     type: 'radar',
@@ -1275,7 +1754,7 @@ function renderReportRadar(scores) {
 }
 
 // ============================================================
-// 13. PDF
+// 26. PDF
 // ============================================================
 
 /**
@@ -1283,6 +1762,8 @@ function renderReportRadar(scores) {
  */
 function generatePDF() {
   const element = document.getElementById('reportContainer');
+  if (!element) return;
+  
   const opt = {
     margin: 10,
     filename: 'relatorio-ma-readiness-baren.pdf',
@@ -1294,13 +1775,19 @@ function generatePDF() {
 }
 
 // ============================================================
-// 14. INICIALIZAÇÃO
+// 27. INICIALIZAÇÃO
 // ============================================================
 
 /**
  * Inicializa a aplicação
  */
 function initApp() {
+  // Renderiza navegação
+  renderNavigation();
+  
+  // Renderiza todas as páginas
+  renderAllPages();
+  
   // Renderiza as perguntas
   renderQuestions('questions1', ['g1', 'g2', 'g3', 'g4', 'g5', 'f1', 'f2', 'f3', 'f4', 'f5']);
   renderQuestions('questions2', ['j1', 'j2', 'j3', 'j4', 'j5', 'o1', 'o2', 'o3', 'o4', 'o5']);
@@ -1311,7 +1798,7 @@ function initApp() {
 }
 
 // ============================================================
-// 15. EVENTOS GLOBAIS
+// 28. EVENTOS GLOBAIS
 // ============================================================
 
 // Inicializa quando o DOM estiver pronto
@@ -1320,13 +1807,9 @@ document.addEventListener('DOMContentLoaded', initApp);
 // Redesenha o gauge ao redimensionar a janela (apenas na página 6)
 window.addEventListener('resize', () => {
   if (state.currentPage == 6) {
-    const score = parseInt(document.getElementById('mainScore').textContent) || 0;
-    drawGauge(score);
+    const score = parseInt(document.getElementById('mainScore')?.textContent) || 0;
+    if (score > 0) {
+      drawGauge('gaugeCanvas', score);
+    }
   }
 });
-
-// ============================================================
-// EXPORTAÇÃO (para uso em outros arquivos)
-// ============================================================
-// Funções e variáveis já estão no escopo global
-// para uso direto nos atributos onclick do HTML
