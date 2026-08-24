@@ -303,7 +303,20 @@ const CONFIG = {
   // Score máximo potencial
   maxPotentialScore: 95,
   // Benchmark para simulação
-  benchmarkLine: 60
+  benchmarkLine: 60,
+  // Cores do sistema
+  colors: {
+    gold: '#E8621A',
+    goldBright: '#FF7A35',
+    goldDim: 'rgba(232,98,26,0.15)',
+    cream: '#F8F4EF',
+    creamDim: 'rgba(248,244,239,0.7)',
+    creamFaint: 'rgba(248,244,239,0.44)',
+    green: '#00e676',
+    red: '#ff1744',
+    yellow: '#ffea00',
+    orange: '#ff9100'
+  }
 };
 
 // ============================================================
@@ -312,6 +325,7 @@ const CONFIG = {
 
 /**
  * Retorna as perguntas agrupadas por seção
+ * @returns {Object} Perguntas agrupadas por seção
  */
 function getQuestionsBySection() {
   return {
@@ -323,6 +337,7 @@ function getQuestionsBySection() {
 
 /**
  * Retorna o número total de perguntas
+ * @returns {number} Total de perguntas
  */
 function getTotalQuestions() {
   return Object.keys(QUESTIONS).length;
@@ -330,6 +345,8 @@ function getTotalQuestions() {
 
 /**
  * Retorna as opções de uma pergunta pelo ID
+ * @param {string} qid - ID da pergunta
+ * @returns {Array} Opções da pergunta
  */
 function getQuestionOptions(qid) {
   return QUESTIONS[qid]?.options || [];
@@ -337,6 +354,8 @@ function getQuestionOptions(qid) {
 
 /**
  * Retorna o número máximo de opções de uma pergunta (base 0)
+ * @param {string} qid - ID da pergunta
+ * @returns {number} Índice máximo
  */
 function getMaxOptionIndex(qid) {
   return (QUESTIONS[qid]?.options?.length || 1) - 1;
@@ -344,6 +363,8 @@ function getMaxOptionIndex(qid) {
 
 /**
  * Verifica se uma pergunta existe
+ * @param {string} qid - ID da pergunta
+ * @returns {boolean} True se a pergunta existe
  */
 function questionExists(qid) {
   return !!QUESTIONS[qid];
@@ -351,6 +372,7 @@ function questionExists(qid) {
 
 /**
  * Retorna todos os IDs dos pilares
+ * @returns {Array} Lista de chaves dos pilares
  */
 function getPillarKeys() {
   return Object.keys(PILLAR_MAP);
@@ -358,6 +380,8 @@ function getPillarKeys() {
 
 /**
  * Retorna as perguntas de um pilar específico
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {Array} Lista de IDs das perguntas
  */
 function getPillarQuestions(pillarKey) {
   return PILLAR_MAP[pillarKey] || [];
@@ -365,6 +389,8 @@ function getPillarQuestions(pillarKey) {
 
 /**
  * Retorna o nome de exibição de um pilar
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {string} Nome do pilar
  */
 function getPillarName(pillarKey) {
   return PILLAR_NAMES[pillarKey] || pillarKey;
@@ -372,6 +398,8 @@ function getPillarName(pillarKey) {
 
 /**
  * Retorna as ações de um pilar específico
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {Array} Lista de ações
  */
 function getActionsForPillar(pillarKey) {
   return ACTION_MAP[pillarKey] || [];
@@ -379,6 +407,8 @@ function getActionsForPillar(pillarKey) {
 
 /**
  * Retorna a solução para um pilar específico
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {Object|null} Solução do pilar
  */
 function getSolutionForPillar(pillarKey) {
   return SOLUTION_MAP[pillarKey] || null;
@@ -386,6 +416,7 @@ function getSolutionForPillar(pillarKey) {
 
 /**
  * Retorna os dados do benchmark para o radar
+ * @returns {Array} Dados do benchmark
  */
 function getBenchmarkData() {
   return BENCHMARK_DATA;
@@ -393,15 +424,68 @@ function getBenchmarkData() {
 
 /**
  * Retorna a configuração do sistema
+ * @returns {Object} Configuração do sistema
  */
 function getConfig() {
   return CONFIG;
 }
 
+/**
+ * Retorna o texto de uma pergunta pelo ID
+ * @param {string} qid - ID da pergunta
+ * @returns {string} Texto da pergunta
+ */
+function getQuestionText(qid) {
+  return QUESTIONS[qid]?.text || '';
+}
+
+/**
+ * Retorna o número de opções de uma pergunta
+ * @param {string} qid - ID da pergunta
+ * @returns {number} Número de opções
+ */
+function getQuestionOptionCount(qid) {
+  return QUESTIONS[qid]?.options?.length || 0;
+}
+
+/**
+ * Retorna a cor de um pilar
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {string} Cor do pilar
+ */
+function getPillarColor(pillarKey) {
+  const colors = {
+    governance: '#E8621A',
+    finance: '#FF7A35',
+    legal: '#F8F4EF',
+    operational: '#00e676',
+    strategy: '#ffea00',
+    people: '#ff9100'
+  };
+  return colors[pillarKey] || CONFIG.colors.gold;
+}
+
+/**
+ * Retorna o ícone SVG de um pilar
+ * @param {string} pillarKey - Chave do pilar
+ * @returns {string} SVG do pilar
+ */
+function getPillarIcon(pillarKey) {
+  const icons = {
+    governance: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+    finance: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/>',
+    legal: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>',
+    operational: '<path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/>',
+    strategy: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+    people: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
+  };
+  return icons[pillarKey] || '';
+}
+
 // ============================================================
 // EXPORTAÇÃO (para uso em outros arquivos)
 // ============================================================
-// Se estiver usando módulos ES6
+// Para módulos ES6
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     QUESTIONS,
@@ -423,6 +507,10 @@ if (typeof module !== 'undefined' && module.exports) {
     getActionsForPillar,
     getSolutionForPillar,
     getBenchmarkData,
-    getConfig
+    getConfig,
+    getQuestionText,
+    getQuestionOptionCount,
+    getPillarColor,
+    getPillarIcon
   };
 }
