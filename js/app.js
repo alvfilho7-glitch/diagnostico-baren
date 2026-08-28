@@ -1,1815 +1,1205 @@
 // ============================================================
-// js/app.js
-// LÓGICA PRINCIPAL DO SISTEMA - RENDERIZA TODO O CONTEÚDO
+// app.js - Lógica principal da aplicação
 // ============================================================
 
 // ============================================================
-// 1. ESTADO GLOBAL
+// 1. NAVEGAÇÃO ENTRE PÁGINAS
 // ============================================================
-const state = {
-  currentPage: 1,
-  answers: {},
-  selectedObjectives: [],
-  simChecked: {},
-  scores: {},
-  chartInstances: {
-    radar: null,
-    subPillar: null,
-    valuation: null,
-    reportRadar: null
-  }
-};
+let currentPage = 1;
+let selectedObjectives = [];
+let answers = {};
+let scores = {};
+let simChecked = {};
+let radarChart = null;
+let subPillarChart = null;
+let valuationChart = null;
+let reportRadarChartInstance = null;
+let gaugeCtx = null;
 
 // ============================================================
-// 2. NAVEGAÇÃO
+// 2. RENDERIZAÇÃO DA APLICAÇÃO
 // ============================================================
+function renderApp() {
+    const root = document.getElementById('root');
+    root.innerHTML = `
+        <div class="app">
+            <!-- HEADER -->
+            <header class="app-header">
+                <div class="container">
+                    <a href="#" class="logo" onclick="goToPage(1)">
+                        <img src="https://uploads.onecompiler.io/43scgwdnz/44qmu8ync/WhatsApp%20Image%202026-05-27%20at%2012.42.22.jpeg" alt="BAREN Logo" />
+                        <div class="logo-text-group">
+                            <span class="logo-text">BAREN</span>
+                            <span class="logo-sub">estratégia</span>
+                        </div>
+                    </a>
+                    <span class="header-badge">⚡ M&A Readiness</span>
+                </div>
+            </header>
 
-/**
- * Navega para uma página específica
- * @param {string|number} page - Número ou ID da página (ex: 1, '7b')
- */
+            <!-- NAVEGAÇÃO -->
+            <nav class="page-nav" id="pageNav">
+                <div class="container">
+                    <button class="step active" data-page="1" onclick="goToPage(1)">
+                        <span class="num">1</span>
+                        <span class="label">Home</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="2" onclick="goToPage(2)">
+                        <span class="num">2</span>
+                        <span class="label">Objetivos</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="3" onclick="goToPage(3)">
+                        <span class="num">3</span>
+                        <span class="label">Pilar 1-2</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="4" onclick="goToPage(4)">
+                        <span class="num">4</span>
+                        <span class="label">Pilar 3-4</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="5" onclick="goToPage(5)">
+                        <span class="num">5</span>
+                        <span class="label">Pilar 5-6</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="6" onclick="goToPage(6)">
+                        <span class="num">6</span>
+                        <span class="label">Visão Geral</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="7" onclick="goToPage(7)">
+                        <span class="num">7</span>
+                        <span class="label">Alertas</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="7b" onclick="goToPage('7b')">
+                        <span class="num">7b</span>
+                        <span class="label">Oportunidades</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="8" onclick="goToPage(8)">
+                        <span class="num">8</span>
+                        <span class="label">Simulador</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="9" onclick="goToPage(9)">
+                        <span class="num">9</span>
+                        <span class="label">Plano Ação</span>
+                    </button>
+                    <span class="step-divider">/</span>
+                    <button class="step" data-page="10" onclick="goToPage(10)">
+                        <span class="num">10</span>
+                        <span class="label">Relatório</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- PROGRESS BAR -->
+            <div class="progress-container" id="progressContainer">
+                <div class="container">
+                    <span class="progress-text" id="progressText">0%</span>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO PRINCIPAL -->
+            <main class="main-content" id="mainContent">
+                <!-- As páginas serão injetadas aqui -->
+            </main>
+        </div>
+    `;
+    
+    renderPages();
+    updateProgress(1);
+}
+
+// ============================================================
+// 3. RENDERIZAÇÃO DAS PÁGINAS
+// ============================================================
+function renderPages() {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `
+        <!-- PÁGINA 1: HOME -->
+        <div class="page active" id="page1">
+            <div class="container">
+                <div style="max-width:720px; margin:0 auto;">
+                    <span class="hero-badge">⚡ M&A Readiness Intelligence Hub</span>
+                    <h1 class="page-title">Onde sua empresa <br /><em>está perdendo valor?</em></h1>
+                    <p class="page-subtitle">Descubra o nível de preparação da sua empresa para fusões, aquisições e captação de investimentos. <strong>Diagnóstico gratuito</strong> em 5 minutos.</p>
+                    <div class="hero-metric">
+                        <span class="number">40%</span>
+                        <span class="text">das empresas perdem valor por falta de preparação estratégica</span>
+                    </div>
+                    <div class="benefits-grid">
+                        <div class="benefit-item"><span class="icon">📊</span><span class="text"><strong>Score Geral</strong><br />M&A Readiness 0-100%</span></div>
+                        <div class="benefit-item"><span class="icon">🎯</span><span class="text"><strong>6 Pilares</strong><br />Análise completa da empresa</span></div>
+                        <div class="benefit-item"><span class="icon">📈</span><span class="text"><strong>Projeção</strong><br />Impacto no valuation</span></div>
+                        <div class="benefit-item"><span class="icon">🔍</span><span class="text"><strong>Alertas</strong><br />50+ pontos críticos</span></div>
+                        <div class="benefit-item"><span class="icon">📋</span><span class="text"><strong>Plano de Ação</strong><br />30+ ações concretas</span></div>
+                        <div class="benefit-item"><span class="icon">🤝</span><span class="text"><strong>Parceiros</strong><br />Matchmaking inteligente</span></div>
+                    </div>
+                    <button class="btn-primary" onclick="goToPage(2)" style="font-size:11px; padding:14px 40px;">
+                        Iniciar Diagnóstico
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 2: OBJETIVOS -->
+        <div class="page" id="page2">
+            <div class="container">
+                <div style="max-width:780px; margin:0 auto;">
+                    <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Qual o <em>principal objetivo</em> da sua empresa?</span>
+                    <p class="page-subtitle">Selecione todas as opções que se aplicam ao momento atual da sua empresa.</p>
+                    <div class="objectives-grid" id="objectivesGrid">
+                        <div class="obj-card" data-value="A" onclick="toggleObjective(this)"><span class="icon">🏛️</span><span class="label">Venda total ou parcial</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="B" onclick="toggleObjective(this)"><span class="icon">💰</span><span class="label">Captação de investimento</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="C" onclick="toggleObjective(this)"><span class="icon">📈</span><span class="label">Crescimento e expansão</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="D" onclick="toggleObjective(this)"><span class="icon">⚙️</span><span class="label">Profissionalização da gestão</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="E" onclick="toggleObjective(this)"><span class="icon">📋</span><span class="label">Reestruturação tributária</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="F" onclick="toggleObjective(this)"><span class="icon">🔧</span><span class="label">Redução de custos</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="G" onclick="toggleObjective(this)"><span class="icon">👨‍👩‍👧‍👦</span><span class="label">Sucessão familiar</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="H" onclick="toggleObjective(this)"><span class="icon">🌍</span><span class="label">Internacionalização</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="I" onclick="toggleObjective(this)"><span class="icon">⭐</span><span class="label">Melhorar rating de crédito</span><span class="check"></span></div>
+                        <div class="obj-card" data-value="J" onclick="toggleObjective(this)"><span class="icon">🎯</span><span class="label">Planejamento estratégico</span><span class="check"></span></div>
+                    </div>
+                    <div class="page-footer">
+                        <button class="btn-secondary" onclick="goToPage(1)">← Voltar</button>
+                        <button class="btn-primary" onclick="goToPage(3)">Continuar →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 3: PERGUNTAS 1/3 -->
+        <div class="page" id="page3">
+            <div class="container">
+                <div style="max-width:720px; margin:0 auto;">
+                    <span class="page-title" style="font-size:clamp(28px,3.5vw,38px);">Diagnóstico <em>Parte 1/3</em></span>
+                    <p class="page-subtitle">Reflexões sobre <strong>Governança e Estrutura Societária</strong> e <strong>Financeiro, Crédito & Capital de Giro</strong>.</p>
+                    <div id="questions1" class="question-card"></div>
+                    <div class="page-footer">
+                        <button class="btn-secondary" onclick="goToPage(2)">← Voltar</button>
+                        <button class="btn-primary" onclick="goToPage(4)">Próxima Parte →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 4: PERGUNTAS 2/3 -->
+        <div class="page" id="page4">
+            <div class="container">
+                <div style="max-width:720px; margin:0 auto;">
+                    <span class="page-title" style="font-size:clamp(28px,3.5vw,38px);">Diagnóstico <em>Parte 2/3</em></span>
+                    <p class="page-subtitle">Reflexões sobre <strong>Jurídico, Tributário & Regulatório</strong> e <strong>Operacional, Energia & Sustentabilidade</strong>.</p>
+                    <div id="questions2" class="question-card"></div>
+                    <div class="page-footer">
+                        <button class="btn-secondary" onclick="goToPage(3)">← Voltar</button>
+                        <button class="btn-primary" onclick="goToPage(5)">Próxima Parte →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 5: PERGUNTAS 3/3 -->
+        <div class="page" id="page5">
+            <div class="container">
+                <div style="max-width:720px; margin:0 auto;">
+                    <span class="page-title" style="font-size:clamp(28px,3.5vw,38px);">Diagnóstico <em>Parte 3/3</em></span>
+                    <p class="page-subtitle">Reflexões sobre <strong>Estratégia, Internacionalização & Câmbio</strong> e <strong>Pessoas, Benefícios & Talentos</strong>.</p>
+                    <div id="questions3" class="question-card"></div>
+                    <div class="page-footer">
+                        <button class="btn-secondary" onclick="goToPage(4)">← Voltar</button>
+                        <button class="btn-primary" onclick="goToPage(6)">Ver Resultados →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 6: DASHBOARD -->
+        <div class="page" id="page6">
+            <div class="container">
+                <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Visão <em>Geral</em></span>
+                <p class="page-subtitle">Resumo do nível de preparação da sua empresa para M&A.</p>
+                <div class="overall-score" id="overallScore">
+                    <div class="gauge-container" id="gaugeContainer">
+                        <canvas id="gaugeCanvas"></canvas>
+                        <div class="gauge-center"><span class="value" id="mainScore">--</span><span class="label">Readiness</span></div>
+                    </div>
+                    <div class="overall-info">
+                        <div class="title">M&A Readiness</div>
+                        <span class="risk" id="riskBadge">Aguardando respostas</span>
+                        <p class="diagnostic" id="diagnosticText">Responda todas as perguntas para gerar seu diagnóstico estratégico.</p>
+                    </div>
+                </div>
+                <div class="pillar-scores" id="pillarScores">
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><div class="name">Governança</div><div class="score" id="scoreGov">--</div><div class="bar"><div class="fill" id="barGov" style="width:0%;"></div></div></div>
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/></svg><div class="name">Financeiro</div><div class="score" id="scoreFin">--</div><div class="bar"><div class="fill" id="barFin" style="width:0%;"></div></div></div>
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><div class="name">Jurídico</div><div class="score" id="scoreJur">--</div><div class="bar"><div class="fill" id="barJur" style="width:0%;"></div></div></div>
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/></svg><div class="name">Operacional</div><div class="score" id="scoreOp">--</div><div class="bar"><div class="fill" id="barOp" style="width:0%;"></div></div></div>
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><div class="name">Estratégia</div><div class="score" id="scoreEstrat">--</div><div class="bar"><div class="fill" id="barEstrat" style="width:0%;"></div></div></div>
+                    <div class="pillar-card"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><div class="name">Pessoas</div><div class="score" id="scorePessoas">--</div><div class="bar"><div class="fill" id="barPessoas" style="width:0%;"></div></div></div>
+                </div>
+                <div class="charts-row">
+                    <div class="chart-container"><div class="chart-title">📊 Maturidade por Sub-pilar</div><canvas id="subPillarChart"></canvas></div>
+                    <div class="chart-container"><div class="chart-title">📈 Valuation Projetado vs. Potencial</div><canvas id="valuationChart"></canvas></div>
+                </div>
+                <div class="chart-container" style="height:300px; margin-bottom:16px;"><div class="chart-title">🎯 Radar de Maturidade vs. Benchmark</div><canvas id="radarChart"></canvas></div>
+                <div class="page-footer">
+                    <button class="btn-secondary" onclick="goToPage(5)">← Voltar</button>
+                    <button class="btn-primary" onclick="goToPage(7)">Ver Alertas →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 7: ALERTAS -->
+        <div class="page" id="page7">
+            <div class="container">
+                <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Alertas por <em>Severidade</em></span>
+                <p class="page-subtitle">Clique em cada alerta para ver o plano de ação detalhado.</p>
+                <div class="alerts-list" id="alertsList"><div class="alert-item" style="text-align:center;padding:40px;color:var(--cream-faint);border-left-color:transparent;">Responda todas as perguntas para gerar os alertas.</div></div>
+                <div class="page-footer">
+                    <button class="btn-secondary" onclick="goToPage(6)">← Voltar</button>
+                    <button class="btn-primary" onclick="goToPage('7b')">Ver Oportunidades →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 7B: OPORTUNIDADES -->
+        <div class="page" id="page7b">
+            <div class="container">
+                <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Soluções <em>Recomendadas</em></span>
+                <p class="page-subtitle">Serviços e parceiros estratégicos para acelerar sua prontidão.</p>
+                <div class="opportunities-grid" id="opportunitiesGrid"></div>
+                <div class="page-footer">
+                    <button class="btn-secondary" onclick="goToPage(7)">← Voltar</button>
+                    <button class="btn-primary" onclick="goToPage(8)">Ir para Simulador →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 8: SIMULADOR -->
+        <div class="page" id="page8">
+            <div class="container">
+                <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Calculador de <em>Ganho de Valuation</em></span>
+                <p class="page-subtitle">Selecione as ações que sua empresa pode implementar e veja o impacto financeiro.</p>
+                <div class="simulator-grid">
+                    <div class="sim-actions" id="simActions"><div class="section-title">📋 Ações Recomendadas</div></div>
+                    <div class="sim-results-panel" id="simResultsPanel">
+                        <div class="section-title">📈 Retorno sobre o Investimento</div>
+                        <div class="mini-gauge">
+                            <span style="font-size:11px;color:var(--cream-dim);min-width:100px;">M&A Readiness</span>
+                            <div class="track"><div class="fill" id="simGaugeFill" style="width:0%;"></div><div class="benchmark-line" id="simBenchmarkLine" style="left:60%;"></div></div>
+                            <span class="label" id="simGaugeLabel">0%</span>
+                        </div>
+                        <div class="sim-metric"><span class="label">Múltiplo de EBITDA Adicional</span><span class="value" id="simMultiple">0.0x</span></div>
+                        <div class="sim-metric"><span class="label">Redução de Desconto de Risco</span><span class="value green" id="simRiskReduction">-0%</span></div>
+                        <div class="sim-metric"><span class="label">Tempo de Due Diligence</span><span class="value" id="simTimeToMarket">12 meses</span></div>
+                        <div class="sim-metric"><span class="label">Atratividade do Comprador</span><span class="value" style="font-size:14px;font-family:'Inter',sans-serif;font-weight:500;" id="simBuyerProfile">⚠️ Restrita</span></div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="btn-secondary" onclick="goToPage('7b')">← Voltar</button>
+                    <button class="btn-primary" onclick="goToPage(9)">Ver Plano de Ação →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 9: PLANO DE AÇÃO -->
+        <div class="page" id="page9">
+            <div class="container">
+                <span class="page-title" style="font-size:clamp(28px,3.5vw,40px);">Plano de <em>Ação Personalizado</em></span>
+                <p class="page-subtitle">Ações priorizadas com base no seu diagnóstico. As tarefas já pré-selecionadas vieram do simulador.</p>
+                <div class="action-groups" id="actionGroups"></div>
+                <div class="page-footer">
+                    <button class="btn-secondary" onclick="goToPage(8)">← Voltar</button>
+                    <button class="btn-primary" onclick="goToPage(10)">Ver Relatório →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA 10: RELATÓRIO -->
+        <div class="page" id="page10">
+            <div class="container">
+                <div class="report-container" id="reportContainer">
+                    <div class="report-header">
+                        <div class="left"><div class="sub">M&A Readiness Intelligence Hub</div><div class="title">Relatório <em>Executivo</em></div><div class="sub" style="margin-top:2px;">BAREN · Diagnóstico Estratégico</div></div>
+                        <div class="right"><div class="score-number" id="reportScoreNumber">--</div><div class="score-label">M&A Readiness</div></div>
+                    </div>
+                    <div class="report-body">
+                        <div class="report-grid">
+                            <div class="report-card full-width" style="height:260px;padding:12px 16px;"><div class="card-title">🎯 Radar de Maturidade</div><div style="height:200px;"><canvas id="reportRadarChart"></canvas></div></div>
+                            <div class="report-card"><div class="card-title">📊 Diagnóstico</div><div class="card-content" id="reportDiagnostic">Aguardando dados</div></div>
+                            <div class="report-card"><div class="card-title">💰 Impacto no Valuation</div><div class="card-content" id="reportValuationImpact">Aguardando dados</div></div>
+                            <div class="report-card full-width"><div class="card-title">🗓️ Roadmap de Prontidão</div><div class="report-roadmap" id="reportRoadmap"></div></div>
+                            <div class="report-card full-width"><div class="card-title">🤝 Soluções Recomendadas</div><div class="card-content" id="reportSolutions">Aguardando dados</div></div>
+                        </div>
+                    </div>
+                    <div class="report-footer">
+                        <button class="btn-secondary" onclick="goToPage(9)">← Voltar</button>
+                        <button class="btn-primary" onclick="generatePDF()">📄 Baixar Relatório PDF</button>
+                        <button class="btn-secondary" onclick="goToPage(1)">Novo Diagnóstico</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Inicializar perguntas
+    renderQuestions('questions1', ['g1', 'g2', 'g3', 'g4', 'g5', 'f1', 'f2', 'f3', 'f4', 'f5']);
+    renderQuestions('questions2', ['j1', 'j2', 'j3', 'j4', 'j5', 'o1', 'o2', 'o3', 'o4', 'o5']);
+    renderQuestions('questions3', ['e1', 'e2', 'e3', 'e4', 'e5', 'p1', 'p2', 'p3', 'p4', 'p5']);
+}
+
+// ============================================================
+// 4. FUNÇÕES DE NAVEGAÇÃO
+// ============================================================
 function goToPage(page) {
-  // Esconde todas as páginas
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  
-  // Mostra a página alvo
-  const target = document.getElementById('page' + page);
-  if (target) {
-    target.classList.add('active');
-    state.currentPage = page;
-  }
-  
-  // Atualiza a navegação
-  document.querySelectorAll('.page-nav .step').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.page == page) btn.classList.add('active');
-  });
-  
-  // Atualiza a barra de progresso
-  updateProgress(page);
-  
-  // Scroll para o topo
-  document.querySelector('.main-content').scrollTop = 0;
-  
-  // Renderiza conteúdo específico da página
-  renderPageContent(page);
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page' + page);
+    if (target) {
+        target.classList.add('active');
+        currentPage = page;
+    }
+    document.querySelectorAll('.page-nav .step').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.page == page) btn.classList.add('active');
+    });
+    updateProgress(page);
+    const mainContent = document.getElementById('mainContent');
+    if (mainContent) mainContent.scrollTop = 0;
+    if (page == 6) renderDashboard();
+    if (page == 7) renderAlerts();
+    if (page == '7b') renderOpportunities();
+    if (page == 8) renderSimulator();
+    if (page == 9) renderActions();
+    if (page == 10) renderReport();
 }
 
-/**
- * Atualiza a barra de progresso
- * @param {string|number} page - Página atual
- */
 function updateProgress(page) {
-  const pages = ['1', '2', '3', '4', '5', '6', '7', '7b', '8', '9', '10'];
-  const index = pages.indexOf(String(page));
-  const pct = Math.round(((index + 1) / pages.length) * 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressText').textContent = pct + '%';
-}
-
-/**
- * Renderiza conteúdo específico da página
- * @param {string|number} page - Página atual
- */
-function renderPageContent(page) {
-  switch(page) {
-    case 6:
-      renderDashboard();
-      break;
-    case 7:
-      renderAlerts();
-      break;
-    case '7b':
-      renderOpportunities();
-      break;
-    case 8:
-      renderSimulator();
-      break;
-    case 9:
-      renderActions();
-      break;
-    case 10:
-      renderReport();
-      break;
-  }
+    const pages = ['1', '2', '3', '4', '5', '6', '7', '7b', '8', '9', '10'];
+    const index = pages.indexOf(String(page));
+    const pct = Math.round(((index + 1) / pages.length) * 100);
+    const fill = document.getElementById('progressFill');
+    const text = document.getElementById('progressText');
+    if (fill) fill.style.width = pct + '%';
+    if (text) text.textContent = pct + '%';
 }
 
 // ============================================================
-// 3. NAVEGAÇÃO - RENDERIZA OS BOTÕES
+// 5. OBJETIVOS
 // ============================================================
-
-/**
- * Renderiza os botões de navegação
- */
-function renderNavigation() {
-  const container = document.getElementById('navContainer');
-  const pages = [
-    { id: 1, label: 'Home' },
-    { id: 2, label: 'Objetivos' },
-    { id: 3, label: 'Gov+Fin' },
-    { id: 4, label: 'Jur+Op' },
-    { id: 5, label: 'Estrat+Pess' },
-    { id: 6, label: 'Visão Geral' },
-    { id: 7, label: 'Alertas' },
-    { id: '7b', label: 'Oportunidades' },
-    { id: 8, label: 'Simulador' },
-    { id: 9, label: 'Plano Ação' },
-    { id: 10, label: 'Relatório' }
-  ];
-  
-  let html = '';
-  pages.forEach((p, index) => {
-    const active = index === 0 ? 'active' : '';
-    html += `
-      <button class="step ${active}" data-page="${p.id}" onclick="goToPage('${p.id}')">
-        <span class="num">${index + 1}</span>
-        <span class="label">${p.label}</span>
-      </button>
-    `;
-    if (index < pages.length - 1) {
-      html += `<span class="step-divider">/</span>`;
-    }
-  });
-  
-  container.innerHTML = html;
-}
-
-// ============================================================
-// 4. PÁGINAS - RENDERIZAÇÃO
-// ============================================================
-
-/**
- * Renderiza todas as páginas no main content
- */
-function renderAllPages() {
-  const container = document.getElementById('mainContent');
-  
-  const pages = {
-    1: renderPage1,
-    2: renderPage2,
-    3: renderPage3,
-    4: renderPage4,
-    5: renderPage5,
-    6: renderPage6,
-    7: renderPage7,
-    '7b': renderPage7b,
-    8: renderPage8,
-    9: renderPage9,
-    10: renderPage10
-  };
-  
-  let html = '';
-  Object.keys(pages).forEach(key => {
-    const pageHtml = pages[key]();
-    html += pageHtml;
-  });
-  
-  container.innerHTML = html;
-  
-  // Ativa a primeira página
-  document.querySelector('.page')?.classList.add('active');
-}
-
-// ============================================================
-// 5. PÁGINA 1 - HOME
-// ============================================================
-function renderPage1() {
-  return `
-    <div class="page" id="page1">
-      <div class="container">
-        <div style="max-width: 720px; margin: 0 auto;">
-          <span class="hero-badge">⚡ M&A Readiness Intelligence Hub</span>
-          <h1 class="page-title">
-            Onde sua empresa <br /><em>está perdendo valor?</em>
-          </h1>
-          <p class="page-subtitle">
-            Descubra o nível de preparação da sua empresa para fusões, aquisições
-            e captação de investimentos. <strong>Diagnóstico gratuito</strong> em 5 minutos.
-          </p>
-
-          <div class="hero-metric">
-            <span class="number">40%</span>
-            <span class="text">das empresas perdem valor por falta de preparação estratégica</span>
-          </div>
-
-          <div class="benefits-grid">
-            <div class="benefit-item">
-              <span class="icon">📊</span>
-              <span class="text"><strong>Score Geral</strong><br />M&A Readiness 0-100%</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">🎯</span>
-              <span class="text"><strong>6 Pilares</strong><br />Análise completa da empresa</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">📈</span>
-              <span class="text"><strong>Projeção</strong><br />Impacto no valuation</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">🔍</span>
-              <span class="text"><strong>Alertas</strong><br />50+ pontos críticos</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">📋</span>
-              <span class="text"><strong>Plano de Ação</strong><br />30+ ações concretas</span>
-            </div>
-            <div class="benefit-item">
-              <span class="icon">🤝</span>
-              <span class="text"><strong>Parceiros</strong><br />Matchmaking inteligente</span>
-            </div>
-          </div>
-
-          <button class="btn-primary" onclick="goToPage(2)" style="font-size:11px; padding:14px 40px;">
-            Iniciar Diagnóstico
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 6. PÁGINA 2 - OBJETIVOS
-// ============================================================
-function renderPage2() {
-  const objectives = [
-    { value: 'A', icon: '🏛️', label: 'Venda total ou parcial' },
-    { value: 'B', icon: '💰', label: 'Captação de investimento' },
-    { value: 'C', icon: '📈', label: 'Crescimento e expansão' },
-    { value: 'D', icon: '⚙️', label: 'Profissionalização da gestão' },
-    { value: 'E', icon: '📋', label: 'Reestruturação tributária' },
-    { value: 'F', icon: '🔧', label: 'Redução de custos' },
-    { value: 'G', icon: '👨‍👩‍👧‍👦', label: 'Sucessão familiar' },
-    { value: 'H', icon: '🌍', label: 'Internacionalização' },
-    { value: 'I', icon: '⭐', label: 'Melhorar rating de crédito' },
-    { value: 'J', icon: '🎯', label: 'Planejamento estratégico' }
-  ];
-  
-  let objectivesHtml = objectives.map(obj => `
-    <div class="obj-card" data-value="${obj.value}" onclick="toggleObjective(this)">
-      <span class="icon">${obj.icon}</span>
-      <span class="label">${obj.label}</span>
-      <span class="check"></span>
-    </div>
-  `).join('');
-  
-  return `
-    <div class="page" id="page2">
-      <div class="container">
-        <div style="max-width: 780px; margin: 0 auto;">
-          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Qual o <em>principal objetivo</em> da sua empresa?</span>
-          <p class="page-subtitle">Selecione todas as opções que se aplicam ao momento atual da sua empresa.</p>
-
-          <div class="objectives-grid" id="objectivesGrid">
-            ${objectivesHtml}
-          </div>
-
-          <div class="page-footer">
-            <button class="btn-secondary" onclick="goToPage(1)">← Voltar</button>
-            <button class="btn-primary" onclick="goToPage(3)">Continuar →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 7. PÁGINA 3 - PERGUNTAS PARTE 1
-// ============================================================
-function renderPage3() {
-  return `
-    <div class="page" id="page3">
-      <div class="container">
-        <div style="max-width: 720px; margin: 0 auto;">
-          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 1/3</em></span>
-          <p class="page-subtitle">Responda sobre <strong>Governança e Financeiro</strong> da sua empresa.</p>
-
-          <div id="questions1" class="question-card">
-            <!-- As perguntas serão geradas via JavaScript -->
-          </div>
-
-          <div class="page-footer">
-            <button class="btn-secondary" onclick="goToPage(2)">← Voltar</button>
-            <button class="btn-primary" onclick="goToPage(4)">Próxima Parte →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 8. PÁGINA 4 - PERGUNTAS PARTE 2
-// ============================================================
-function renderPage4() {
-  return `
-    <div class="page" id="page4">
-      <div class="container">
-        <div style="max-width: 720px; margin: 0 auto;">
-          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 2/3</em></span>
-          <p class="page-subtitle">Responda sobre <strong>Jurídico e Operacional</strong> da sua empresa.</p>
-
-          <div id="questions2" class="question-card">
-            <!-- As perguntas serão geradas via JavaScript -->
-          </div>
-
-          <div class="page-footer">
-            <button class="btn-secondary" onclick="goToPage(3)">← Voltar</button>
-            <button class="btn-primary" onclick="goToPage(5)">Próxima Parte →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 9. PÁGINA 5 - PERGUNTAS PARTE 3
-// ============================================================
-function renderPage5() {
-  return `
-    <div class="page" id="page5">
-      <div class="container">
-        <div style="max-width: 720px; margin: 0 auto;">
-          <span class="page-title" style="font-size: clamp(28px, 3.5vw, 38px);">Diagnóstico <em>Parte 3/3</em></span>
-          <p class="page-subtitle">Responda sobre <strong>Estratégia e Pessoas</strong> da sua empresa.</p>
-
-          <div id="questions3" class="question-card">
-            <!-- As perguntas serão geradas via JavaScript -->
-          </div>
-
-          <div class="page-footer">
-            <button class="btn-secondary" onclick="goToPage(4)">← Voltar</button>
-            <button class="btn-primary" onclick="goToPage(6)">Ver Resultados →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 10. PÁGINA 6 - DASHBOARD
-// ============================================================
-function renderPage6() {
-  const pillars = [
-    { key: 'governance', name: 'Governança', svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' },
-    { key: 'finance', name: 'Financeiro', svg: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/>' },
-    { key: 'legal', name: 'Jurídico', svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>' },
-    { key: 'operational', name: 'Operacional', svg: '<path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/>' },
-    { key: 'strategy', name: 'Estratégia', svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' },
-    { key: 'people', name: 'Pessoas', svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' }
-  ];
-  
-  let pillarsHtml = pillars.map(p => `
-    <div class="pillar-card">
-      <svg class="icon-svg" viewBox="0 0 24 24">${p.svg}</svg>
-      <div class="name">${p.name}</div>
-      <div class="score" id="score${p.key.charAt(0).toUpperCase() + p.key.slice(1)}">--</div>
-      <div class="bar"><div class="fill" id="bar${p.key.charAt(0).toUpperCase() + p.key.slice(1)}" style="width:0%;"></div></div>
-    </div>
-  `).join('');
-  
-  return `
-    <div class="page" id="page6">
-      <div class="container">
-        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Visão <em>Geral</em></span>
-        <p class="page-subtitle">Resumo do nível de preparação da sua empresa para M&A.</p>
-
-        <div class="overall-score" id="overallScore">
-          <div class="gauge-container" id="gaugeContainer">
-            <canvas id="gaugeCanvas"></canvas>
-            <div class="gauge-center">
-              <span class="value" id="mainScore">--</span>
-              <span class="label">Readiness</span>
-            </div>
-          </div>
-          <div class="overall-info">
-            <div class="title">M&A Readiness</div>
-            <span class="risk" id="riskBadge">Aguardando respostas</span>
-            <p class="diagnostic" id="diagnosticText">
-              Responda todas as perguntas para gerar seu diagnóstico estratégico.
-            </p>
-          </div>
-        </div>
-
-        <div class="pillar-scores" id="pillarScores">
-          ${pillarsHtml}
-        </div>
-
-        <div class="charts-row">
-          <div class="chart-container">
-            <div class="chart-title">📊 Maturidade por Sub-pilar</div>
-            <canvas id="subPillarChart"></canvas>
-          </div>
-          <div class="chart-container">
-            <div class="chart-title">📈 Valuation Projetado vs. Potencial</div>
-            <canvas id="valuationChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-container" style="height:300px; margin-bottom:16px;">
-          <div class="chart-title">🎯 Radar de Maturidade vs. Benchmark</div>
-          <canvas id="radarChart"></canvas>
-        </div>
-
-        <div class="page-footer">
-          <button class="btn-secondary" onclick="goToPage(5)">← Voltar</button>
-          <button class="btn-primary" onclick="goToPage(7)">Ver Alertas →</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 11. PÁGINA 7 - ALERTAS
-// ============================================================
-function renderPage7() {
-  return `
-    <div class="page" id="page7">
-      <div class="container">
-        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Alertas por <em>Severidade</em></span>
-        <p class="page-subtitle">Clique em cada alerta para ver o plano de ação detalhado.</p>
-
-        <div class="alerts-list" id="alertsList">
-          <div class="alert-item" style="text-align:center; padding:40px; color:var(--cream-faint); border-left-color:transparent;">
-            Responda todas as perguntas para gerar os alertas.
-          </div>
-        </div>
-
-        <div class="page-footer">
-          <button class="btn-secondary" onclick="goToPage(6)">← Voltar</button>
-          <button class="btn-primary" onclick="goToPage('7b')">Ver Oportunidades →</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 12. PÁGINA 7B - OPORTUNIDADES
-// ============================================================
-function renderPage7b() {
-  return `
-    <div class="page" id="page7b">
-      <div class="container">
-        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Soluções <em>Recomendadas</em></span>
-        <p class="page-subtitle">Serviços e parceiros estratégicos para acelerar sua prontidão.</p>
-
-        <div class="opportunities-grid" id="opportunitiesGrid">
-          <!-- Gerado via JavaScript -->
-        </div>
-
-        <div class="page-footer">
-          <button class="btn-secondary" onclick="goToPage(7)">← Voltar</button>
-          <button class="btn-primary" onclick="goToPage(8)">Ir para Simulador →</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 13. PÁGINA 8 - SIMULADOR
-// ============================================================
-function renderPage8() {
-  return `
-    <div class="page" id="page8">
-      <div class="container">
-        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Calculador de <em>Ganho de Valuation</em></span>
-        <p class="page-subtitle">Selecione as ações que sua empresa pode implementar e veja o impacto financeiro.</p>
-
-        <div class="simulator-grid">
-          <div class="sim-actions" id="simActions">
-            <div class="section-title">📋 Ações Recomendadas</div>
-            <!-- Gerado via JavaScript -->
-          </div>
-
-          <div class="sim-results-panel" id="simResultsPanel">
-            <div class="section-title">📈 Retorno sobre o Investimento</div>
-            
-            <div class="mini-gauge">
-              <span style="font-size:11px; color:var(--cream-dim); min-width:100px;">M&A Readiness</span>
-              <div class="track">
-                <div class="fill" id="simGaugeFill" style="width:0%;"></div>
-                <div class="benchmark-line" id="simBenchmarkLine" style="left:60%;"></div>
-              </div>
-              <span class="label" id="simGaugeLabel">0%</span>
-            </div>
-
-            <div class="sim-metric">
-              <span class="label">Múltiplo de EBITDA Adicional</span>
-              <span class="value" id="simMultiple">0.0x</span>
-            </div>
-            <div class="sim-metric">
-              <span class="label">Redução de Desconto de Risco</span>
-              <span class="value green" id="simRiskReduction">-0%</span>
-            </div>
-            <div class="sim-metric">
-              <span class="label">Tempo de Due Diligence</span>
-              <span class="value" id="simTimeToMarket">12 meses</span>
-            </div>
-            <div class="sim-metric">
-              <span class="label">Atratividade do Comprador</span>
-              <span class="value" style="font-size:14px; font-family:'Inter',sans-serif; font-weight:500;" id="simBuyerProfile">⚠️ Restrita</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="page-footer">
-          <button class="btn-secondary" onclick="goToPage('7b')">← Voltar</button>
-          <button class="btn-primary" onclick="goToPage(9)">Ver Plano de Ação →</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 14. PÁGINA 9 - PLANO DE AÇÃO
-// ============================================================
-function renderPage9() {
-  return `
-    <div class="page" id="page9">
-      <div class="container">
-        <span class="page-title" style="font-size: clamp(28px, 3.5vw, 40px);">Plano de <em>Ação Personalizado</em></span>
-        <p class="page-subtitle">Ações priorizadas com base no seu diagnóstico. As tarefas já pré-selecionadas vieram do simulador.</p>
-
-        <div class="action-groups" id="actionGroups">
-          <!-- Gerado via JavaScript -->
-        </div>
-
-        <div class="page-footer">
-          <button class="btn-secondary" onclick="goToPage(8)">← Voltar</button>
-          <button class="btn-primary" onclick="goToPage(10)">Ver Relatório →</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 15. PÁGINA 10 - RELATÓRIO
-// ============================================================
-function renderPage10() {
-  return `
-    <div class="page" id="page10">
-      <div class="container">
-        <div class="report-container" id="reportContainer">
-          <div class="report-header">
-            <div class="left">
-              <div class="sub">M&A Readiness Intelligence Hub</div>
-              <div class="title">Relatório <em>Executivo</em></div>
-              <div class="sub" style="margin-top:2px;">BAREN · Diagnóstico Estratégico</div>
-            </div>
-            <div class="right">
-              <div class="score-number" id="reportScoreNumber">--</div>
-              <div class="score-label">M&A Readiness</div>
-            </div>
-          </div>
-
-          <div class="report-body">
-            <div class="report-grid">
-              <div class="report-card full-width" style="height:260px; padding:12px 16px;">
-                <div class="card-title">🎯 Radar de Maturidade</div>
-                <div style="height:200px;">
-                  <canvas id="reportRadarChart"></canvas>
-                </div>
-              </div>
-
-              <div class="report-card">
-                <div class="card-title">📊 Diagnóstico</div>
-                <div class="card-content" id="reportDiagnostic">
-                  Aguardando dados
-                </div>
-              </div>
-
-              <div class="report-card">
-                <div class="card-title">💰 Impacto no Valuation</div>
-                <div class="card-content" id="reportValuationImpact">
-                  Aguardando dados
-                </div>
-              </div>
-
-              <div class="report-card full-width">
-                <div class="card-title">🗓️ Roadmap de Prontidão</div>
-                <div class="report-roadmap" id="reportRoadmap">
-                  <!-- Gerado via JavaScript -->
-                </div>
-              </div>
-
-              <div class="report-card full-width">
-                <div class="card-title">🤝 Soluções Recomendadas</div>
-                <div class="card-content" id="reportSolutions">
-                  Aguardando dados
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="report-footer">
-            <button class="btn-secondary" onclick="goToPage(9)">← Voltar</button>
-            <button class="btn-primary" onclick="generatePDF()">
-              📄 Baixar Relatório PDF
-            </button>
-            <button class="btn-secondary" onclick="goToPage(1)">Novo Diagnóstico</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// ============================================================
-// 16. OBJETIVOS - FUNÇÃO TOGGLE
-// ============================================================
-
-/**
- * Alterna a seleção de um objetivo
- * @param {HTMLElement} el - Elemento do card clicado
- */
 function toggleObjective(el) {
-  el.classList.toggle('selected');
-  const value = el.dataset.value;
-  if (el.classList.contains('selected')) {
-    if (!state.selectedObjectives.includes(value)) {
-      state.selectedObjectives.push(value);
-    }
-  } else {
-    state.selectedObjectives = state.selectedObjectives.filter(v => v !== value);
-  }
-}
-
-// ============================================================
-// 17. PERGUNTAS - RENDERIZAÇÃO E SELEÇÃO
-// ============================================================
-
-/**
- * Renderiza as perguntas em um container
- * @param {string} containerId - ID do container
- * @param {string[]} questionIds - Lista de IDs das perguntas
- */
-function renderQuestions(containerId, questionIds) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  
-  let html = '';
-  let qNum = 0;
-  
-  questionIds.forEach(id => {
-    const q = QUESTIONS[id];
-    if (!q) return;
-    qNum++;
-    
-    html += `
-      <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:9px; color:var(--cream-faint); letter-spacing:1px; font-weight:600;">Pergunta ${qNum}</span>
-        </div>
-        <div style="font-size:14px; color:var(--cream); font-weight:500; margin-bottom:10px;">${q.text}</div>
-        <div class="q-options" data-qid="${id}">
-          ${q.options.map((opt, idx) => `
-            <div class="q-opt" onclick="selectOption(this, '${id}', ${idx})">
-              <span class="radio"></span>
-              <span class="label">${opt}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  });
-  
-  container.innerHTML = html;
-}
-
-/**
- * Seleciona uma opção de resposta
- * @param {HTMLElement} el - Elemento clicado
- * @param {string} qid - ID da pergunta
- * @param {number} idx - Índice da opção selecionada
- */
-function selectOption(el, qid, idx) {
-  const parent = el.closest('.q-options');
-  parent.querySelectorAll('.q-opt').forEach(opt => opt.classList.remove('selected'));
-  el.classList.add('selected');
-  state.answers[qid] = idx;
-}
-
-// ============================================================
-// 18. DASHBOARD - CÁLCULO DE SCORES
-// ============================================================
-
-/**
- * Calcula os scores por pilar baseado nas respostas
- * @returns {Object} Scores por pilar
- */
-function getPillarScores() {
-  const result = {};
-  
-  Object.keys(PILLAR_MAP).forEach(key => {
-    const qs = PILLAR_MAP[key];
-    let sum = 0, total = 0;
-    
-    qs.forEach(qid => {
-      if (state.answers[qid] !== undefined) {
-        const maxIdx = getMaxOptionIndex(qid);
-        sum += (state.answers[qid] / maxIdx) * 100;
-        total++;
-      }
-    });
-    
-    result[key] = total > 0 ? Math.round(sum / total) : 0;
-  });
-  
-  return result;
-}
-
-/**
- * Calcula os dados por sub-pilar
- * @returns {Object} Dados por sub-pilar
- */
-function getSubPillarData() {
-  const result = {};
-  
-  Object.keys(SUB_PILLAR_MAP).forEach(label => {
-    const qs = SUB_PILLAR_MAP[label];
-    let sum = 0, total = 0;
-    
-    qs.forEach(qid => {
-      if (state.answers[qid] !== undefined) {
-        const maxIdx = getMaxOptionIndex(qid);
-        sum += (state.answers[qid] / maxIdx) * 100;
-        total++;
-      }
-    });
-    
-    result[label] = total > 0 ? Math.round(sum / total) : 0;
-  });
-  
-  return result;
-}
-
-/**
- * Retorna o índice máximo de uma pergunta
- * @param {string} qid - ID da pergunta
- * @returns {number} Índice máximo
- */
-function getMaxOptionIndex(qid) {
-  return (QUESTIONS[qid]?.options?.length || 1) - 1;
-}
-
-// ============================================================
-// 19. DASHBOARD - RENDERIZAÇÃO
-// ============================================================
-
-/**
- * Renderiza o dashboard completo
- */
-function renderDashboard() {
-  const scoresResult = getPillarScores();
-  state.scores = scoresResult;
-  const subData = getSubPillarData();
-  
-  // Calcula score geral
-  const overall = Object.values(scoresResult).reduce((a, b) => a + b, 0) / Object.values(scoresResult).length;
-  const overallRounded = Math.round(overall);
-  
-  // Atualiza score principal
-  document.getElementById('mainScore').textContent = overallRounded + '%';
-  
-  // Atualiza badge de risco
-  updateRiskBadge(overallRounded);
-  
-  // Atualiza scores dos pilares
-  updatePillarScores(scoresResult);
-  
-  // Desenha o velocímetro
-  drawGauge('gaugeCanvas', overallRounded);
-  
-  // Renderiza gráficos
-  renderCharts(scoresResult, subData, overallRounded);
-}
-
-/**
- * Atualiza o badge de risco
- * @param {number} score - Score geral
- */
-function updateRiskBadge(score) {
-  const riskBadge = document.getElementById('riskBadge');
-  let riskClass = 'medium', riskText = 'Atenção';
-  let diagnosticMsg = '';
-  
-  if (score >= 80) {
-    riskClass = 'low';
-    riskText = 'Baixo Risco';
-    diagnosticMsg = 'Sua empresa está bem posicionada para atrair fundos de Private Equity e compradores estratégicos.';
-  } else if (score >= 60) {
-    riskClass = 'medium';
-    riskText = 'Atenção';
-    diagnosticMsg = 'Seu nível atual de prontidão restringe o interesse de fundos e reduz seu poder de barganha.';
-  } else if (score >= 40) {
-    riskClass = 'high';
-    riskText = 'Alto Risco';
-    diagnosticMsg = 'Sua empresa está vulnerável a descontos severos em negociações. Priorize a estruturação.';
-  } else {
-    riskClass = 'critical';
-    riskText = 'Crítico';
-    diagnosticMsg = 'Sem governança e finanças organizadas, a venda ou captação se torna inviável.';
-  }
-  
-  riskBadge.className = 'risk ' + riskClass;
-  riskBadge.textContent = riskText;
-  document.getElementById('diagnosticText').textContent = diagnosticMsg;
-}
-
-/**
- * Atualiza os scores dos pilares
- * @param {Object} scoresResult - Scores por pilar
- */
-function updatePillarScores(scoresResult) {
-  const pillarMap = {
-    governance: { score: 'scoreGovernance', bar: 'barGovernance' },
-    finance: { score: 'scoreFinance', bar: 'barFinance' },
-    legal: { score: 'scoreLegal', bar: 'barLegal' },
-    operational: { score: 'scoreOperational', bar: 'barOperational' },
-    strategy: { score: 'scoreStrategy', bar: 'barStrategy' },
-    people: { score: 'scorePeople', bar: 'barPeople' }
-  };
-  
-  Object.keys(pillarMap).forEach(key => {
-    const val = scoresResult[key] || 0;
-    const scoreEl = document.getElementById(pillarMap[key].score);
-    const barEl = document.getElementById(pillarMap[key].bar);
-    if (scoreEl) scoreEl.textContent = val + '%';
-    if (barEl) barEl.style.width = val + '%';
-  });
-}
-
-// ============================================================
-// 20. GRÁFICOS (Charts.js)
-// ============================================================
-
-/**
- * Renderiza todos os gráficos do dashboard
- * @param {Object} scoresResult - Scores por pilar
- * @param {Object} subData - Dados por sub-pilar
- * @param {number} overallRounded - Score geral arredondado
- */
-function renderCharts(scoresResult, subData, overallRounded) {
-  // Radar Chart
-  renderRadarChart(scoresResult);
-  
-  // Sub-pillar Chart
-  renderSubPillarChart(subData);
-  
-  // Valuation Chart
-  renderValuationChart(overallRounded);
-}
-
-/**
- * Renderiza o gráfico radar
- * @param {Object} scoresResult - Scores por pilar
- */
-function renderRadarChart(scoresResult) {
-  const ctx = document.getElementById('radarChart');
-  if (!ctx) return;
-  
-  // Destroi instância anterior se existir
-  if (state.chartInstances.radar) {
-    state.chartInstances.radar.destroy();
-  }
-  
-  const labels = ['Governança', 'Financeiro', 'Jurídico', 'Operacional', 'Estratégia', 'Pessoas'];
-  const data = [
-    scoresResult.governance || 0,
-    scoresResult.finance || 0,
-    scoresResult.legal || 0,
-    scoresResult.operational || 0,
-    scoresResult.strategy || 0,
-    scoresResult.people || 0
-  ];
-  const benchmark = [65, 55, 70, 50, 60, 55];
-  
-  state.chartInstances.radar = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Sua Empresa',
-          data: data,
-          backgroundColor: 'rgba(232,98,26,0.15)',
-          borderColor: '#E8621A',
-          borderWidth: 2,
-          pointBackgroundColor: '#E8621A',
-          pointBorderColor: '#fff',
-          pointRadius: 4
-        },
-        {
-          label: 'Benchmark Mercado',
-          data: benchmark,
-          backgroundColor: 'transparent',
-          borderColor: 'rgba(248,244,239,0.25)',
-          borderWidth: 1.5,
-          borderDash: [4, 4],
-          pointBackgroundColor: 'transparent',
-          pointBorderColor: 'transparent',
-          pointRadius: 0
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#F8F4EF', font: { size: 10 } }
-        }
-      },
-      scales: {
-        r: {
-          angleLines: { color: 'rgba(248,244,239,0.06)' },
-          grid: { color: 'rgba(248,244,239,0.06)' },
-          pointLabels: { color: '#F8F4EF', font: { size: 9 } },
-          ticks: { display: false, stepSize: 20 },
-          min: 0,
-          max: 100
-        }
-      }
-    }
-  });
-}
-
-/**
- * Renderiza o gráfico de sub-pilares
- * @param {Object} subData - Dados por sub-pilar
- */
-function renderSubPillarChart(subData) {
-  const ctx = document.getElementById('subPillarChart');
-  if (!ctx) return;
-  
-  if (state.chartInstances.subPillar) {
-    state.chartInstances.subPillar.destroy();
-  }
-  
-  const subLabels = Object.keys(subData);
-  const subValues = Object.values(subData);
-  
-  state.chartInstances.subPillar = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: subLabels.slice(0, 12),
-      datasets: [{
-        label: 'Maturidade %',
-        data: subValues.slice(0, 12),
-        backgroundColor: subValues.slice(0, 12).map(v => {
-          if (v >= 70) return 'rgba(0,230,118,0.7)';
-          if (v >= 40) return 'rgba(255,145,0,0.7)';
-          return 'rgba(255,23,68,0.7)';
-        }),
-        borderColor: subValues.slice(0, 12).map(v => {
-          if (v >= 70) return '#00e676';
-          if (v >= 40) return '#ff9100';
-          return '#ff1744';
-        }),
-        borderWidth: 1,
-        borderRadius: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: {
-          min: 0,
-          max: 100,
-          ticks: { color: '#F8F4EF', font: { size: 8 }, stepSize: 25 },
-          grid: { color: 'rgba(248,244,239,0.06)' }
-        },
-        x: {
-          ticks: { color: '#F8F4EF', font: { size: 7 }, maxRotation: 45 }
-        }
-      }
-    }
-  });
-}
-
-/**
- * Renderiza o gráfico de valuation
- * @param {number} currentScore - Score atual
- */
-function renderValuationChart(currentScore) {
-  const ctx = document.getElementById('valuationChart');
-  if (!ctx) return;
-  
-  if (state.chartInstances.valuation) {
-    state.chartInstances.valuation.destroy();
-  }
-  
-  const potentialScore = Math.min(95, currentScore + 40);
-  
-  state.chartInstances.valuation = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Atual', 'Mês 3', 'Mês 6', 'Mês 12', 'Potencial'],
-      datasets: [
-        {
-          label: 'Sua Empresa',
-          data: [currentScore, currentScore + 5, currentScore + 12, currentScore + 20, potentialScore],
-          borderColor: '#E8621A',
-          backgroundColor: 'rgba(232,98,26,0.05)',
-          fill: true,
-          tension: 0.3,
-          pointBackgroundColor: '#E8621A',
-          pointRadius: 3
-        },
-        {
-          label: 'Valuação Máxima',
-          data: [potentialScore - 15, potentialScore - 8, potentialScore - 3, potentialScore, potentialScore],
-          borderColor: 'rgba(248,244,239,0.2)',
-          borderDash: [4, 4],
-          fill: false,
-          tension: 0.3,
-          pointBackgroundColor: 'rgba(248,244,239,0.2)',
-          pointRadius: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#F8F4EF', font: { size: 9 } }
-        }
-      },
-      scales: {
-        y: {
-          min: 0,
-          max: 100,
-          ticks: { color: '#F8F4EF', font: { size: 8 }, stepSize: 25 },
-          grid: { color: 'rgba(248,244,239,0.06)' }
-        },
-        x: {
-          ticks: { color: '#F8F4EF', font: { size: 8 } }
-        }
-      }
-    }
-  });
-}
-
-// ============================================================
-// 21. ALERTAS
-// ============================================================
-
-/**
- * Renderiza a lista de alertas
- */
-function renderAlerts() {
-  const container = document.getElementById('alertsList');
-  const alerts = generateAlerts();
-  
-  if (alerts.length === 0) {
-    container.innerHTML = `
-      <div class="alert-item low" style="text-align:center; justify-content:center; border-left-color:#00e676; padding:20px;">
-        <span style="font-size:14px; color:var(--cream);">✅ Nenhum alerta crítico identificado</span>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = alerts.map((a, idx) => `
-    <div class="alert-item ${a.severity}">
-      <div class="alert-header" onclick="toggleAlert(this)">
-        <div class="left">
-          <span class="severity ${a.severity}">${a.severity}</span>
-          <span class="msg">${a.msg}</span>
-        </div>
-        <span class="toggle-icon">▾</span>
-      </div>
-      <div class="alert-body" id="alertBody${idx}">
-        <div class="plan-item"><strong>Plano de Ação:</strong> ${a.action}</div>
-        ${a.details ? a.details.map(d => `<div class="plan-item">${d}</div>`).join('') : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-/**
- * Alterna a exibição de um alerta (accordion)
- * @param {HTMLElement} header - Cabeçalho do alerta clicado
- */
-function toggleAlert(header) {
-  const body = header.nextElementSibling;
-  const icon = header.querySelector('.toggle-icon');
-  body.classList.toggle('open');
-  icon.classList.toggle('open');
-}
-
-/**
- * Gera os alertas baseados nos scores
- * @returns {Array} Lista de alertas
- */
-function generateAlerts() {
-  const alerts = [];
-  const s = state.scores;
-  
-  // Governança
-  if (s.governance < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Governança crítica: ausência de conselho formal e estrutura de decisão.',
-      action: 'Estruturar governança com conselho consultivo e acordo de sócios.',
-      details: ['Formalizar acordo de sócios com regras de saída', 'Instituir conselho consultivo com membro independente']
-    });
-  } else if (s.governance < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Governança em atenção: formalize acordo de sócios e crie conselho.',
-      action: 'Criar estrutura de governança básica.',
-      details: ['Formalizar acordo de sócios', 'Criar conselho consultivo informal']
-    });
-  }
-  
-  // Financeiro
-  if (s.finance < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Financeiro crítico: alto endividamento e falta de auditoria.',
-      action: 'Reestruturar finanças com auditoria e redução de dívida.',
-      details: ['Contratar auditoria externa dos últimos 3 anos', 'Reestruturar endividamento', 'Constituir reserva de emergência']
-    });
-  } else if (s.finance < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Financeiro em atenção: melhore reserva de caixa e controles.',
-      action: 'Otimizar gestão financeira.',
-      details: ['Constituir reserva de emergência', 'Implementar DRE gerencial']
-    });
-  }
-  
-  // Jurídico
-  if (s.legal < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Jurídico crítico: contratos desatualizados e riscos fiscais.',
-      action: 'Regularizar contratos e implementar compliance.',
-      details: ['Realizar revisão tributária', 'Revisar contratos e NDAs', 'Regularizar documentação societária']
-    });
-  } else if (s.legal < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Jurídico em atenção: revise contratos e documentação.',
-      action: 'Revisar contratos estratégicos.',
-      details: ['Revisar contratos de clientes e fornecedores', 'Regularizar marcas e patentes']
-    });
-  }
-  
-  // Operacional
-  if (s.operational < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Operacional crítico: processos não documentados e falta de ERP.',
-      action: 'Documentar processos e implementar ERP.',
-      details: ['Documentar SOPs', 'Implementar ERP integrado', 'Estruturar BPO financeiro']
-    });
-  } else if (s.operational < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Operacional em atenção: padronize processos e implemente ERP.',
-      action: 'Padronizar processos operacionais.',
-      details: ['Documentar processos críticos', 'Avaliar implementação de ERP']
-    });
-  }
-  
-  // Estratégia
-  if (s.strategy < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Estratégia crítica: ausência de plano de negócios e posicionamento.',
-      action: 'Elaborar plano de negócios e pitch deck.',
-      details: ['Elaborar plano de negócios 3-5 anos', 'Desenvolver pitch deck profissional', 'Estruturar data room']
-    });
-  } else if (s.strategy < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Estratégia em atenção: desenvolva pitch deck e plano de negócios.',
-      action: 'Fortalecer planejamento estratégico.',
-      details: ['Desenvolver pitch deck', 'Atualizar plano de negócios']
-    });
-  }
-  
-  // Pessoas
-  if (s.people < 40) {
-    alerts.push({
-      severity: 'critical',
-      msg: 'Pessoas crítico: alta rotatividade e falta de plano de carreira.',
-      action: 'Estruturar RH com plano de carreira e benefícios.',
-      details: ['Estruturar plano de carreira', 'Implementar programa de benefícios', 'Criar programa de treinamento']
-    });
-  } else if (s.people < 60) {
-    alerts.push({
-      severity: 'high',
-      msg: 'Pessoas em atenção: crie programa de benefícios e treinamento.',
-      action: 'Melhorar gestão de pessoas.',
-      details: ['Criar plano de carreira', 'Implementar programa de treinamento']
-    });
-  }
-  
-  return alerts;
-}
-
-// ============================================================
-// 22. OPORTUNIDADES
-// ============================================================
-
-/**
- * Renderiza as oportunidades/soluções recomendadas
- */
-function renderOpportunities() {
-  const container = document.getElementById('opportunitiesGrid');
-  const opps = generateSolutions();
-  
-  if (opps.length === 0) {
-    container.innerHTML = `
-      <div class="opp-card" style="grid-column:1/-1; text-align:center; padding:40px;">
-        <div class="empty-state">✅ Sua empresa está bem posicionada. Nenhuma ação urgente necessária.</div>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = opps.map(o => `
-    <div class="opp-card">
-      <svg class="icon-svg" viewBox="0 0 24 24">${o.svg}</svg>
-      <div class="title">${o.title}</div>
-      <div class="desc">${o.desc}</div>
-      <div>
-        <span class="partner-badge">${o.partner}</span>
-        <button class="btn-connect" onclick="alert('Conectando com ${o.partner}...')">Solicitar Introdução</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-/**
- * Gera as soluções baseadas nos scores mais baixos
- * @returns {Array} Lista de soluções
- */
-function generateSolutions() {
-  const s = state.scores;
-  const sorted = Object.keys(s).sort((a, b) => s[a] - s[b]);
-  const worst = sorted.slice(0, 2);
-  
-  const result = [];
-  worst.forEach(key => {
-    if (s[key] < 70 && SOLUTION_MAP[key]) {
-      result.push(SOLUTION_MAP[key]);
-    }
-  });
-  
-  return result;
-}
-
-// ============================================================
-// 23. SIMULADOR
-// ============================================================
-
-/**
- * Renderiza o simulador
- */
-function renderSimulator() {
-  const container = document.getElementById('simActions');
-  const actions = getSimActions();
-  
-  let html = `<div class="section-title">📋 Ações Recomendadas</div>`;
-  
-  actions.forEach(a => {
-    const checked = state.simChecked[a.id] ? 'checked' : '';
-    html += `
-      <div class="sim-action-item" onclick="toggleSimAction('${a.id}')">
-        <div class="checkbox-custom ${checked}" id="simCheck_${a.id}"></div>
-        <div class="info">
-          <div class="label">${a.label} <span class="impact-tag ${a.impact}">${a.impact}</span></div>
-          <div class="desc">${a.desc}</div>
-        </div>
-      </div>
-    `;
-  });
-  
-  container.innerHTML = html;
-  updateSimulator();
-}
-
-/**
- * Obtém as ações para o simulador baseado nos scores
- * @returns {Array} Lista de ações
- */
-function getSimActions() {
-  const s = state.scores;
-  const actions = [];
-  
-  if (s.governance < 60) {
-    actions.push({ 
-      id: 'gov1', label: 'Formalizar Acordo de Sócios', 
-      desc: 'Regras de entrada, saída e drag along.', 
-      impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 
-    });
-    actions.push({ 
-      id: 'gov2', label: 'Instituir Conselho Consultivo', 
-      desc: 'Com membro independente.', 
-      impact: 'critical', score: 20, multiple: 0.5, riskReduction: 12, timeReduction: 3 
-    });
-  }
-  
-  if (s.finance < 60) {
-    actions.push({ 
-      id: 'fin1', label: 'Auditar Balanços (3 anos)', 
-      desc: 'Empresa homologada.', 
-      impact: 'critical', score: 25, multiple: 0.6, riskReduction: 15, timeReduction: 4 
-    });
-    actions.push({ 
-      id: 'fin2', label: 'Segregação de Contas', 
-      desc: 'Fim da mistura física/jurídica.', 
-      impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 
-    });
-  }
-  
-  if (s.legal < 60) {
-    actions.push({ 
-      id: 'leg1', label: 'Saneamento de Passivos', 
-      desc: 'Trabalhistas e contingências cíveis.', 
-      impact: 'medium', score: 12, multiple: 0.2, riskReduction: 6, timeReduction: 2 
-    });
-    actions.push({ 
-      id: 'leg2', label: 'Revisão de Contratos', 
-      desc: 'Contratos de longo prazo com clientes.', 
-      impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 
-    });
-  }
-  
-  if (s.operational < 60) {
-    actions.push({ 
-      id: 'op1', label: 'Documentar Processos (SOPs)', 
-      desc: 'Padronização operacional.', 
-      impact: 'high', score: 18, multiple: 0.35, riskReduction: 10, timeReduction: 3 
-    });
-    actions.push({ 
-      id: 'op2', label: 'Implementar ERP Integrado', 
-      desc: 'Sistema de gestão completo.', 
-      impact: 'critical', score: 22, multiple: 0.5, riskReduction: 12, timeReduction: 4 
-    });
-  }
-  
-  if (s.strategy < 60) {
-    actions.push({ 
-      id: 'est1', label: 'Elaborar Plano de Negócios', 
-      desc: '3-5 anos com projeções.', 
-      impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 
-    });
-    actions.push({ 
-      id: 'est2', label: 'Desenvolver Pitch Deck', 
-      desc: 'Profissional e executivo.', 
-      impact: 'medium', score: 10, multiple: 0.2, riskReduction: 5, timeReduction: 1 
-    });
-  }
-  
-  if (s.people < 60) {
-    actions.push({ 
-      id: 'peo1', label: 'Estruturar Plano de Carreira', 
-      desc: 'Com metas e benefícios.', 
-      impact: 'high', score: 14, multiple: 0.25, riskReduction: 6, timeReduction: 2 
-    });
-    actions.push({ 
-      id: 'peo2', label: 'Programa de Treinamento', 
-      desc: 'Capacitação contínua.', 
-      impact: 'medium', score: 10, multiple: 0.15, riskReduction: 4, timeReduction: 1 
-    });
-  }
-  
-  return actions;
-}
-
-/**
- * Alterna a seleção de uma ação no simulador
- * @param {string} id - ID da ação
- */
-function toggleSimAction(id) {
-  state.simChecked[id] = !state.simChecked[id];
-  const checkbox = document.getElementById('simCheck_' + id);
-  if (checkbox) checkbox.classList.toggle('checked');
-  updateSimulator();
-}
-
-/**
- * Atualiza os resultados do simulador
- */
-function updateSimulator() {
-  const actions = getSimActions();
-  let totalScore = 0;
-  let totalMultiple = 0;
-  let totalRiskReduction = 0;
-  let totalTimeReduction = 0;
-  
-  actions.forEach(a => {
-    if (state.simChecked[a.id]) {
-      totalScore += a.score;
-      totalMultiple += a.multiple;
-      totalRiskReduction += a.riskReduction;
-      totalTimeReduction += a.timeReduction;
-    }
-  });
-  
-  const baseScore = parseInt(document.getElementById('mainScore').textContent) || 0;
-  const projected = Math.min(100, baseScore + totalScore);
-  
-  // Atualiza gauge
-  const gaugeFill = document.getElementById('simGaugeFill');
-  const gaugeLabel = document.getElementById('simGaugeLabel');
-  if (gaugeFill) gaugeFill.style.width = projected + '%';
-  if (gaugeLabel) gaugeLabel.textContent = projected + '%';
-  
-  // Benchmark line
-  const benchmarkLine = document.getElementById('simBenchmarkLine');
-  if (benchmarkLine) benchmarkLine.style.left = '60%';
-  
-  // Métricas
-  const multipleEl = document.getElementById('simMultiple');
-  const riskEl = document.getElementById('simRiskReduction');
-  const timeEl = document.getElementById('simTimeToMarket');
-  const profileEl = document.getElementById('simBuyerProfile');
-  
-  if (multipleEl) multipleEl.textContent = '+' + totalMultiple.toFixed(1) + 'x';
-  if (riskEl) riskEl.textContent = '-' + Math.round(totalRiskReduction) + '%';
-  
-  const newTime = Math.max(4, 14 - totalTimeReduction);
-  if (timeEl) timeEl.textContent = newTime + ' meses';
-  
-  // Perfil do comprador
-  if (profileEl) {
-    if (projected >= 80) {
-      profileEl.textContent = '🚀 Fundos de Private Equity e Players Estratégicos';
-    } else if (projected >= 60) {
-      profileEl.textContent = '🏢 Compradores Nacionais e Regionais';
-    } else if (projected >= 40) {
-      profileEl.textContent = '⚠️ Compradores Oportunistas e Locais';
+    el.classList.toggle('selected');
+    const value = el.dataset.value;
+    if (el.classList.contains('selected')) {
+        if (!selectedObjectives.includes(value)) selectedObjectives.push(value);
     } else {
-      profileEl.textContent = '❌ Atratividade Muito Restrita';
+        selectedObjectives = selectedObjectives.filter(v => v !== value);
     }
-  }
 }
 
 // ============================================================
-// 24. PLANO DE AÇÃO
+// 6. PERGUNTAS
 // ============================================================
-
-/**
- * Renderiza o plano de ação
- */
-function renderActions() {
-  const container = document.getElementById('actionGroups');
-  const s = state.scores;
-  
-  const pillars = {
-    'Governança': { key: 'governance', actions: ACTION_MAP.governance || [] },
-    'Financeiro': { key: 'finance', actions: ACTION_MAP.finance || [] },
-    'Jurídico': { key: 'legal', actions: ACTION_MAP.legal || [] },
-    'Operacional': { key: 'operational', actions: ACTION_MAP.operational || [] },
-    'Estratégia': { key: 'strategy', actions: ACTION_MAP.strategy || [] },
-    'Pessoas': { key: 'people', actions: ACTION_MAP.people || [] }
-  };
-  
-  let html = '';
-  
-  Object.keys(pillars).forEach(name => {
-    const p = pillars[name];
-    const score = s[p.key] || 0;
-    
-    if (score >= 70) {
-      html += `
-        <div class="action-group">
-          <div class="group-title">${name} <span class="score-badge">✅ Excelência</span></div>
-          <div class="excellence-badge">
-            <svg class="icon-svg" viewBox="0 0 24 24" style="stroke:#00e676;"><polyline points="20 6 9 17 4 12"/></svg>
-            Sua empresa já está em nível de excelência. Nenhuma ação necessária.
-          </div>
-        </div>
-      `;
-      return;
-    }
-    
-    const filtered = p.actions.filter(a => a.score > 0);
-    
-    if (filtered.length === 0) {
-      html += `
-        <div class="action-group">
-          <div class="group-title">${name} <span class="score-badge">${score}%</span></div>
-          <div style="padding:12px 0; color:var(--cream-faint); font-size:12px;">Nenhuma ação específica identificada.</div>
-        </div>
-      `;
-      return;
-    }
-    
-    // Ordena por impacto (maior score primeiro)
-    filtered.sort((a, b) => b.score - a.score);
-    
-    html += `
-      <div class="action-group">
-        <div class="group-title">${name} <span class="score-badge">${score}%</span></div>
-    `;
-    
-    filtered.forEach(a => {
-      const preselected = state.simChecked[a.id] ? 'preselect' : '';
-      const checked = state.simChecked[a.id] ? 'checked' : '';
-      
-      html += `
-        <div class="action-item ${preselected}">
-          <input type="checkbox" ${checked} />
-          <span class="label">${a.label}</span>
-          <span class="impact-tag ${a.impact}">${a.impact}</span>
-        </div>
-      `;
+function renderQuestions(containerId, questionIds) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    let html = '';
+    let qNum = 0;
+    questionIds.forEach(id => {
+        const q = window.QUESTIONS && window.QUESTIONS[id];
+        if (!q) return;
+        qNum++;
+        html += `
+            <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:9px; color:var(--cream-faint); letter-spacing:1px; font-weight:600;">Pergunta ${qNum}</span>
+                </div>
+                <div style="font-size:14px; color:var(--cream); font-weight:500; margin-bottom:10px;">${q.text}</div>
+                <div class="q-options" data-qid="${id}">
+                    ${q.options.map((opt, idx) => `
+                        <div class="q-opt" onclick="selectOption(this, '${id}', ${idx})">
+                            <span class="radio"></span>
+                            <span class="label">${opt}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     });
-    
-    html += `</div>`;
-  });
-  
-  container.innerHTML = html;
+    container.innerHTML = html;
+}
+
+function selectOption(el, qid, idx) {
+    const parent = el.closest('.q-options');
+    parent.querySelectorAll('.q-opt').forEach(opt => opt.classList.remove('selected'));
+    el.classList.add('selected');
+    answers[qid] = idx;
 }
 
 // ============================================================
-// 25. RELATÓRIO
+// 7. DASHBOARD
 // ============================================================
-
-/**
- * Renderiza o relatório executivo
- */
-function renderReport() {
-  const s = state.scores;
-  const overall = Object.values(s).reduce((a, b) => a + b, 0) / Object.values(s).length;
-  const overallRounded = Math.round(overall);
-  
-  // Score principal
-  const scoreEl = document.getElementById('reportScoreNumber');
-  if (scoreEl) scoreEl.textContent = overallRounded + '%';
-  
-  // Diagnóstico
-  renderReportDiagnostic(overallRounded);
-  
-  // Impacto no Valuation
-  renderReportValuationImpact(overallRounded);
-  
-  // Roadmap
-  renderReportRoadmap(s);
-  
-  // Soluções recomendadas
-  renderReportSolutions();
-  
-  // Radar Chart
-  renderReportRadar(s);
-}
-
-/**
- * Renderiza o diagnóstico no relatório
- * @param {number} score - Score geral
- */
-function renderReportDiagnostic(score) {
-  const el = document.getElementById('reportDiagnostic');
-  if (!el) return;
-  
-  let msg = '';
-  if (score >= 80) {
-    msg = 'Sua empresa está <span class="highlight">bem posicionada</span> para M&A. Fundos de Private Equity e compradores estratégicos demonstram interesse.';
-  } else if (score >= 60) {
-    msg = 'Seu nível de prontidão <span class="highlight">restringe o interesse</span> de fundos e reduz seu poder de barganha. Foco em estruturação.';
-  } else if (score >= 40) {
-    msg = 'Sua empresa está <span class="highlight">vulnerável a descontos severos</span> em negociações. Priorize a organização financeira e governança.';
-  } else {
-    msg = 'Sem governança e finanças organizadas, a venda ou captação se torna <span class="highlight">inviável</span>. Ação imediata necessária.';
-  }
-  el.innerHTML = msg;
-}
-
-/**
- * Renderiza o impacto no valuation no relatório
- * @param {number} currentScore - Score atual
- */
-function renderReportValuationImpact(currentScore) {
-  const el = document.getElementById('reportValuationImpact');
-  if (!el) return;
-  
-  const potential = Math.min(95, currentScore + 40);
-  const gain = potential - currentScore;
-  
-  el.innerHTML = `
-    <div><strong>Atual:</strong> ${currentScore}% de prontidão</div>
-    <div><strong>Potencial:</strong> ${potential}% com ações corretivas</div>
-    <div style="margin-top:6px; color:var(--gold);">📈 Ganho estimado: <strong>+${gain}%</strong> em múltiplo de EBITDA</div>
-    <div style="font-size:11px; color:var(--cream-faint); margin-top:4px;">Empresas com >80% de prontidão negociam com prêmio de até 2x EBITDA.</div>
-  `;
-}
-
-/**
- * Renderiza o roadmap no relatório
- * @param {Object} scores - Scores por pilar
- */
-function renderReportRoadmap(scores) {
-  const el = document.getElementById('reportRoadmap');
-  if (!el) return;
-  
-  const html = `
-    <div class="phase urgent">
-      <div class="phase-title">🔴 Urgente (30 dias)</div>
-      <div class="phase-items">
-        ${scores.governance < 40 ? '<div class="item">Formalizar acordo de sócios</div>' : ''}
-        ${scores.finance < 40 ? '<div class="item">Contratar auditoria financeira</div>' : ''}
-        ${scores.legal < 40 ? '<div class="item">Revisão tributária imediata</div>' : ''}
-        ${scores.governance >= 40 && scores.finance >= 40 && scores.legal >= 40 ? '<div class="item">Nenhuma ação urgente identificada</div>' : ''}
-      </div>
-    </div>
-    <div class="phase structure">
-      <div class="phase-title">🟡 Estruturação (30-90 dias)</div>
-      <div class="phase-items">
-        ${scores.governance < 60 ? '<div class="item">Criar conselho consultivo</div>' : ''}
-        ${scores.finance < 60 ? '<div class="item">Reestruturar endividamento</div>' : ''}
-        ${scores.operational < 60 ? '<div class="item">Implementar ERP e documentar SOPs</div>' : ''}
-        ${scores.governance >= 60 && scores.finance >= 60 && scores.operational >= 60 ? '<div class="item">Manter excelência operacional</div>' : ''}
-      </div>
-    </div>
-    <div class="phase expand">
-      <div class="phase-title">🟢 Expansão (90+ dias)</div>
-      <div class="phase-items">
-        ${scores.strategy < 60 ? '<div class="item">Elaborar pitch deck e plano de negócios</div>' : ''}
-        ${scores.people < 60 ? '<div class="item">Estruturar plano de carreira</div>' : ''}
-        ${scores.strategy >= 60 && scores.people >= 60 ? '<div class="item">Preparar data room para M&A</div>' : ''}
-      </div>
-    </div>
-  `;
-  el.innerHTML = html;
-}
-
-/**
- * Renderiza as soluções recomendadas no relatório
- */
-function renderReportSolutions() {
-  const el = document.getElementById('reportSolutions');
-  if (!el) return;
-  
-  const solutions = generateSolutions();
-  let html = '<ul>';
-  
-  if (solutions.length === 0) {
-    html += '<li>✅ Sua empresa está bem posicionada. Nenhuma solução urgente necessária.</li>';
-  } else {
-    solutions.forEach(o => {
-      html += `<li><span class="bullet">•</span> <strong>${o.title}</strong> — ${o.desc} <span style="color:var(--gold);font-size:10px;">(${o.partner})</span></li>`;
+function getPillarScores() {
+    const pillars = {
+        governance: ['g1', 'g2', 'g3', 'g4', 'g5'],
+        finance: ['f1', 'f2', 'f3', 'f4', 'f5'],
+        legal: ['j1', 'j2', 'j3', 'j4', 'j5'],
+        operational: ['o1', 'o2', 'o3', 'o4', 'o5'],
+        strategy: ['e1', 'e2', 'e3', 'e4', 'e5'],
+        people: ['p1', 'p2', 'p3', 'p4', 'p5']
+    };
+    const result = {};
+    Object.keys(pillars).forEach(key => {
+        const qs = pillars[key];
+        let sum = 0, total = 0;
+        qs.forEach(qid => {
+            if (answers[qid] !== undefined) {
+                const q = window.QUESTIONS && window.QUESTIONS[qid];
+                const maxIdx = q?.options?.length - 1 || 0;
+                sum += (answers[qid] / maxIdx) * 100;
+                total++;
+            }
+        });
+        result[key] = total > 0 ? Math.round(sum / total) : 0;
     });
-  }
-  
-  html += '</ul>';
-  el.innerHTML = html;
+    return result;
 }
 
-/**
- * Renderiza o radar chart no relatório
- * @param {Object} scores - Scores por pilar
- */
-function renderReportRadar(scores) {
-  const ctx = document.getElementById('reportRadarChart');
-  if (!ctx) return;
-  
-  if (state.chartInstances.reportRadar) {
-    state.chartInstances.reportRadar.destroy();
-  }
-  
-  const labels = ['Governança', 'Financeiro', 'Jurídico', 'Operacional', 'Estratégia', 'Pessoas'];
-  const data = [
-    scores.governance || 0,
-    scores.finance || 0,
-    scores.legal || 0,
-    scores.operational || 0,
-    scores.strategy || 0,
-    scores.people || 0
-  ];
-  const benchmark = [65, 55, 70, 50, 60, 55];
-  
-  state.chartInstances.reportRadar = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Sua Empresa',
-          data: data,
-          backgroundColor: 'rgba(232,98,26,0.15)',
-          borderColor: '#E8621A',
-          borderWidth: 2,
-          pointBackgroundColor: '#E8621A',
-          pointBorderColor: '#fff',
-          pointRadius: 3
+function getSubPillarData() {
+    const subMap = {
+        'Conselho/Decisão': ['g1'],
+        'Acordo de Sócios': ['g2'],
+        'Blindagem Patrimonial': ['g3'],
+        'Sucessão': ['g4'],
+        'Estrutura Jurídica': ['g5'],
+        'Auditoria': ['f1'],
+        'Reserva de Caixa': ['f2'],
+        'Capital de Giro': ['f3'],
+        'Taxas Bancárias': ['f4'],
+        'Revisão Tributária': ['f5'],
+        'Contratos': ['j1'],
+        'Documentação Societária': ['j2'],
+        'Propriedade Intelectual': ['j3'],
+        'Planejamento Tributário': ['j4'],
+        'Reforma Tributária': ['j5'],
+        'SOPs': ['o1'],
+        'ERP': ['o2'],
+        'Eficiência Energética': ['o3'],
+        'Mercado Livre de Energia': ['o4'],
+        'Cadeia de Suprimentos': ['o5'],
+        'Plano Estratégico': ['e1'],
+        'Pitch Deck/Data Room': ['e2'],
+        'Hedge Cambial': ['e3'],
+        'Otimização Cambial': ['e4'],
+        'Internacionalização': ['e5'],
+        'Alinhamento': ['p1'],
+        'Plano de Carreira': ['p2'],
+        'Benefícios': ['p3'],
+        'Treinamento': ['p4'],
+        'Sucessão de Líderes': ['p5']
+    };
+    const result = {};
+    Object.keys(subMap).forEach(label => {
+        const qs = subMap[label];
+        let sum = 0, total = 0;
+        qs.forEach(qid => {
+            if (answers[qid] !== undefined) {
+                const q = window.QUESTIONS && window.QUESTIONS[qid];
+                const maxIdx = q?.options?.length - 1 || 0;
+                sum += (answers[qid] / maxIdx) * 100;
+                total++;
+            }
+        });
+        result[label] = total > 0 ? Math.round(sum / total) : 0;
+    });
+    return result;
+}
+
+function renderDashboard() {
+    const scoresResult = getPillarScores();
+    scores = scoresResult;
+    const subData = getSubPillarData();
+
+    const overall = Object.values(scoresResult).reduce((a, b) => a + b, 0) / Object.values(scoresResult).length;
+    const overallRounded = Math.round(overall);
+
+    const mainScore = document.getElementById('mainScore');
+    if (mainScore) mainScore.textContent = overallRounded + '%';
+
+    const riskBadge = document.getElementById('riskBadge');
+    let riskClass = 'medium', riskText = 'Atenção';
+    let diagnosticMsg = '';
+    if (overallRounded >= 80) { riskClass = 'low'; riskText = 'Baixo Risco'; diagnosticMsg = 'Sua empresa está bem posicionada para atrair fundos de Private Equity e compradores estratégicos.'; }
+    else if (overallRounded >= 60) { riskClass = 'medium'; riskText = 'Atenção'; diagnosticMsg = 'Seu nível atual de prontidão restringe o interesse de fundos e reduz seu poder de barganha.'; }
+    else if (overallRounded >= 40) { riskClass = 'high'; riskText = 'Alto Risco'; diagnosticMsg = 'Sua empresa está vulnerável a descontos severos em negociações. Priorize a estruturação.'; }
+    else { riskClass = 'critical'; riskText = 'Crítico'; diagnosticMsg = 'Sem governança e finanças organizadas, a venda ou captação se torna inviável.'; }
+    if (riskBadge) {
+        riskBadge.className = 'risk ' + riskClass;
+        riskBadge.textContent = riskText;
+    }
+    const diagnosticText = document.getElementById('diagnosticText');
+    if (diagnosticText) diagnosticText.textContent = diagnosticMsg;
+
+    // Pillar scores
+    const pillarMap = {
+        governance: { score: 'scoreGov', bar: 'barGov' },
+        finance: { score: 'scoreFin', bar: 'barFin' },
+        legal: { score: 'scoreJur', bar: 'barJur' },
+        operational: { score: 'scoreOp', bar: 'barOp' },
+        strategy: { score: 'scoreEstrat', bar: 'barEstrat' },
+        people: { score: 'scorePessoas', bar: 'barPessoas' }
+    };
+    Object.keys(pillarMap).forEach(key => {
+        const val = scoresResult[key] || 0;
+        const scoreEl = document.getElementById(pillarMap[key].score);
+        const barEl = document.getElementById(pillarMap[key].bar);
+        if (scoreEl) scoreEl.textContent = val + '%';
+        if (barEl) barEl.style.width = val + '%';
+    });
+
+    drawGauge(overallRounded);
+    
+    // Inicializar gráficos via charts.js
+    if (typeof initCharts === 'function') {
+        initCharts(scoresResult, subData);
+    }
+}
+
+// ============================================================
+// 8. GAUGE
+// ============================================================
+function drawGauge(value) {
+    const canvas = document.getElementById('gaugeCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const size = Math.min(rect.width || 140, 140);
+    canvas.width = size * 2;
+    canvas.height = size * 2;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2 + 10;
+    const radius = canvas.width / 2 - 20;
+    const startAngle = Math.PI * 0.75;
+    const endAngle = Math.PI * 2.25;
+    const totalAngle = endAngle - startAngle;
+    const currentAngle = startAngle + (value / 100) * totalAngle;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.strokeStyle = 'rgba(248,244,239,0.08)';
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, '#ff1744');
+    gradient.addColorStop(0.4, '#ff9100');
+    gradient.addColorStop(0.7, '#ffea00');
+    gradient.addColorStop(1, '#00e676');
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, currentAngle);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    const dotAngle = currentAngle;
+    const dotX = cx + (radius - 6) * Math.cos(dotAngle);
+    const dotY = cy + (radius - 6) * Math.sin(dotAngle);
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#E8621A';
+    ctx.fill();
+    ctx.shadowColor = 'rgba(232,98,26,0.4)';
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    for (let i = 0; i <= 10; i++) {
+        const angle = startAngle + (i / 10) * totalAngle;
+        const isMain = i % 5 === 0;
+        const len = isMain ? 12 : 6;
+        const x1 = cx + (radius - 4) * Math.cos(angle);
+        const y1 = cy + (radius - 4) * Math.sin(angle);
+        const x2 = cx + (radius - 4 - len) * Math.cos(angle);
+        const y2 = cy + (radius - 4 - len) * Math.sin(angle);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = i / 10 <= value / 100 ? 'rgba(232,98,26,0.6)' : 'rgba(248,244,239,0.2)';
+        ctx.lineWidth = isMain ? 2 : 1;
+        ctx.stroke();
+    }
+}
+
+// ============================================================
+// 9. ALERTAS
+// ============================================================
+function renderAlerts() {
+    const container = document.getElementById('alertsList');
+    const alerts = generateAlerts();
+    if (alerts.length === 0) {
+        container.innerHTML = `
+            <div class="alert-item low" style="text-align:center; justify-content:center; border-left-color:#00e676; padding:20px;">
+                <span style="font-size:14px; color:var(--cream);">✅ Nenhum alerta crítico identificado</span>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = alerts.map((a, idx) => `
+        <div class="alert-item ${a.severity}">
+            <div class="alert-header" onclick="toggleAlert(this)">
+                <div class="left">
+                    <span class="severity ${a.severity}">${a.severity}</span>
+                    <span class="msg">${a.msg}</span>
+                </div>
+                <span class="toggle-icon">▾</span>
+            </div>
+            <div class="alert-body" id="alertBody${idx}">
+                <div class="plan-item"><strong>Plano de Ação:</strong> ${a.action}</div>
+                ${a.details ? a.details.map(d => `<div class="plan-item">${d}</div>`).join('') : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleAlert(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    body.classList.toggle('open');
+    icon.classList.toggle('open');
+}
+
+function generateAlerts() {
+    const alerts = [];
+    const s = scores;
+    if (s.governance < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Governança crítica: ausência de fórum formal de decisão e estrutura societária frágil.',
+        action: 'Estruturar governança com conselho consultivo e acordo de sócios formalizado.',
+        details: ['Formalizar acordo de sócios com regras de entrada e saída', 'Instituir conselho consultivo ou reuniões estruturadas']
+    });
+    if (s.governance < 60 && s.governance >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Governança em atenção: formalize as regras de tomada de decisão e sucessão.',
+        action: 'Criar estrutura de governança básica.',
+        details: ['Documentar processo de tomada de decisão', 'Criar plano de sucessão para sócios']
+    });
+    if (s.finance < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Financeiro crítico: falta de auditoria, reserva de caixa insuficiente e capital de giro desotimizado.',
+        action: 'Reestruturar finanças com auditoria e otimização de capital de giro.',
+        details: ['Contratar auditoria externa', 'Constituir reserva de emergência', 'Otimizar fontes de crédito']
+    });
+    if (s.finance < 60 && s.finance >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Financeiro em atenção: melhore a gestão de capital de giro e revise tributos.',
+        action: 'Otimizar gestão financeira.',
+        details: ['Revisar taxas bancárias', 'Realizar revisão tributária para recuperação de créditos']
+    });
+    if (s.legal < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Jurídico crítico: contratos desatualizados e documentação societária com pendências.',
+        action: 'Regularizar contratos e documentação societária.',
+        details: ['Revisar contratos de clientes e fornecedores', 'Regularizar documentação societária', 'Proteger marcas e propriedade intelectual']
+    });
+    if (s.legal < 60 && s.legal >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Jurídico em atenção: revise contratos e planeje o impacto da Reforma Tributária.',
+        action: 'Revisar contratos estratégicos e planejamento tributário.',
+        details: ['Revisar contratos de longo prazo', 'Simular impacto da Reforma Tributária']
+    });
+    if (s.operational < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Operacional crítico: processos não documentados e dependência de pessoas específicas.',
+        action: 'Documentar processos e implementar ERP.',
+        details: ['Documentar SOPs', 'Implementar ERP integrado', 'Analisar conta de energia']
+    });
+    if (s.operational < 60 && s.operational >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Operacional em atenção: padronize processos e avalie Mercado Livre de Energia.',
+        action: 'Padronizar processos operacionais.',
+        details: ['Documentar processos críticos', 'Avaliar migração para Mercado Livre de Energia']
+    });
+    if (s.strategy < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Estratégia crítica: ausência de plano de negócios e materiais para investidores.',
+        action: 'Elaborar plano de negócios e preparar materiais.',
+        details: ['Elaborar plano de negócios 3-5 anos', 'Desenvolver pitch deck e estruturar data room']
+    });
+    if (s.strategy < 60 && s.strategy >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Estratégia em atenção: desenvolva plano de internacionalização e proteção cambial.',
+        action: 'Fortalecer planejamento estratégico.',
+        details: ['Avaliar oportunidades de internacionalização', 'Implementar hedge cambial']
+    });
+    if (s.people < 40) alerts.push({
+        severity: 'critical',
+        msg: 'Pessoas crítico: falta de plano de carreira e sucessão de líderes.',
+        action: 'Estruturar RH com plano de carreira e mapeamento de sucessão.',
+        details: ['Estruturar plano de carreira', 'Mapear sucessores para posições-chave', 'Revisar benefícios']
+    });
+    if (s.people < 60 && s.people >= 40) alerts.push({
+        severity: 'high',
+        msg: 'Pessoas em atenção: crie programa de desenvolvimento e benefícios competitivos.',
+        action: 'Melhorar gestão de pessoas.',
+        details: ['Implementar programa de treinamento', 'Revisar benefícios para serem competitivos']
+    });
+    return alerts;
+}
+
+// ============================================================
+// 10. OPORTUNIDADES
+// ============================================================
+function renderOpportunities() {
+    const container = document.getElementById('opportunitiesGrid');
+    const opps = generateSolutions();
+    if (opps.length === 0) {
+        container.innerHTML = `
+            <div class="opp-card" style="grid-column:1/-1; text-align:center; padding:40px;">
+                <div class="empty-state">✅ Sua empresa está bem posicionada. Nenhuma ação urgente necessária.</div>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = opps.map(o => `
+        <div class="opp-card">
+            <svg class="icon-svg" viewBox="0 0 24 24">${o.svg}</svg>
+            <div class="title">${o.title}</div>
+            <div class="desc">${o.desc}</div>
+            <div>
+                <span class="partner-badge">${o.partner}</span>
+                <button class="btn-connect" onclick="alert('Conectando com ${o.partner}...')">Solicitar Introdução</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateSolutions() {
+    const s = scores;
+    const sorted = Object.keys(s).sort((a, b) => s[a] - s[b]);
+    const worst = sorted.slice(0, 2);
+
+    const solutionMap = {
+        governance: {
+            title: 'Estruturação de Governança e Acordo de Sócios',
+            desc: 'Formalização de conselho consultivo, acordo de sócios e plano de sucessão.',
+            partner: 'Baren Estratégia',
+            svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
         },
-        {
-          label: 'Benchmark',
-          data: benchmark,
-          backgroundColor: 'transparent',
-          borderColor: 'rgba(248,244,239,0.2)',
-          borderDash: [4, 4],
-          borderWidth: 1.5,
-          pointBackgroundColor: 'transparent',
-          pointBorderColor: 'transparent',
-          pointRadius: 0
+        finance: {
+            title: 'Due Diligence Financeira e Otimização de Capital',
+            desc: 'Auditoria de balanços, reestruturação de capital de giro e revisão tributária.',
+            partner: 'Studio Fiscal / Globus',
+            svg: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/>'
+        },
+        legal: {
+            title: 'Regularização Jurídica e Tributária',
+            desc: 'Revisão de contratos, registro de marcas, compliance e planejamento tributário.',
+            partner: 'Nicacio & Studio Fiscal',
+            svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>'
+        },
+        operational: {
+            title: 'Eficiência Operacional e Energética',
+            desc: 'Documentação de processos, implementação de ERP e migração para Mercado Livre de Energia.',
+            partner: 'Trillia / Ynova',
+            svg: '<path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/>'
+        },
+        strategy: {
+            title: 'Planejamento Estratégico e Internacionalização',
+            desc: 'Desenvolvimento de plano de negócios, pitch deck, data room e otimização cambial.',
+            partner: 'Baren Estratégia / Travellex',
+            svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
+        },
+        people: {
+            title: 'Gestão de Talentos e Benefícios',
+            desc: 'Plano de carreira, benefícios competitivos, treinamento e mapeamento de sucessão.',
+            partner: 'EA Partners',
+            svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#F8F4EF', font: { size: 9 } }
+    };
+
+    const result = [];
+    worst.forEach(key => {
+        if (s[key] < 70 && solutionMap[key]) {
+            result.push(solutionMap[key]);
         }
-      },
-      scales: {
-        r: {
-          angleLines: { color: 'rgba(248,244,239,0.06)' },
-          grid: { color: 'rgba(248,244,239,0.06)' },
-          pointLabels: { color: '#F8F4EF', font: { size: 8 } },
-          ticks: { display: false, stepSize: 20 },
-          min: 0,
-          max: 100
-        }
-      }
-    }
-  });
+    });
+    return result;
 }
 
 // ============================================================
-// 26. PDF
+// 11. SIMULADOR
 // ============================================================
+function renderSimulator() {
+    const container = document.getElementById('simActions');
+    const actions = getSimActions();
+    let html = `<div class="section-title">📋 Ações Recomendadas</div>`;
+    actions.forEach((a) => {
+        const checked = simChecked[a.id] ? 'checked' : '';
+        html += `
+            <div class="sim-action-item" onclick="toggleSimAction('${a.id}')">
+                <div class="checkbox-custom ${checked}" id="simCheck_${a.id}"></div>
+                <div class="info">
+                    <div class="label">${a.label} <span class="impact-tag ${a.impact}">${a.impact}</span></div>
+                    <div class="desc">${a.desc}</div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+    updateSimulator();
+}
 
-/**
- * Gera e baixa o relatório em PDF
- */
+function getSimActions() {
+    const s = scores;
+    const actions = [];
+    if (s.governance < 60) {
+        actions.push({ id: 'gov1', label: 'Formalizar Acordo de Sócios', desc: 'Regras de entrada, saída e tomada de decisão.', impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 });
+        actions.push({ id: 'gov2', label: 'Instituir Conselho Consultivo', desc: 'Com membro independente.', impact: 'critical', score: 20, multiple: 0.5, riskReduction: 12, timeReduction: 3 });
+    }
+    if (s.finance < 60) {
+        actions.push({ id: 'fin1', label: 'Auditar Balanços (3 anos)', desc: 'Empresa homologada.', impact: 'critical', score: 25, multiple: 0.6, riskReduction: 15, timeReduction: 4 });
+        actions.push({ id: 'fin2', label: 'Otimizar Capital de Giro', desc: 'Antecipação de recebíveis e crédito competitivo.', impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 });
+    }
+    if (s.legal < 60) {
+        actions.push({ id: 'leg1', label: 'Revisão Tributária e Contratos', desc: 'Identificar créditos e revisar cláusulas.', impact: 'critical', score: 20, multiple: 0.4, riskReduction: 10, timeReduction: 3 });
+        actions.push({ id: 'leg2', label: 'Proteção de Marcas', desc: 'Registro de propriedade intelectual.', impact: 'medium', score: 12, multiple: 0.2, riskReduction: 5, timeReduction: 1 });
+    }
+    if (s.operational < 60) {
+        actions.push({ id: 'op1', label: 'Documentar Processos (SOPs)', desc: 'Padronização operacional.', impact: 'high', score: 18, multiple: 0.35, riskReduction: 10, timeReduction: 3 });
+        actions.push({ id: 'op2', label: 'Migrar para Mercado Livre de Energia', desc: 'Redução de custos energéticos.', impact: 'medium', score: 12, multiple: 0.2, riskReduction: 5, timeReduction: 2 });
+    }
+    if (s.strategy < 60) {
+        actions.push({ id: 'est1', label: 'Elaborar Plano de Negócios', desc: '3-5 anos com projeções.', impact: 'high', score: 15, multiple: 0.3, riskReduction: 8, timeReduction: 2 });
+        actions.push({ id: 'est2', label: 'Estruturar Data Room e Pitch Deck', desc: 'Para apresentação a investidores.', impact: 'high', score: 15, multiple: 0.25, riskReduction: 10, timeReduction: 3 });
+    }
+    if (s.people < 60) {
+        actions.push({ id: 'peo1', label: 'Estruturar Plano de Carreira', desc: 'Com metas e benefícios.', impact: 'high', score: 14, multiple: 0.25, riskReduction: 6, timeReduction: 2 });
+        actions.push({ id: 'peo2', label: 'Mapeamento de Sucessão', desc: 'Identificar líderes potenciais.', impact: 'medium', score: 12, multiple: 0.2, riskReduction: 5, timeReduction: 1 });
+    }
+    return actions;
+}
+
+function toggleSimAction(id) {
+    simChecked[id] = !simChecked[id];
+    const checkbox = document.getElementById('simCheck_' + id);
+    if (checkbox) checkbox.classList.toggle('checked');
+    updateSimulator();
+}
+
+function updateSimulator() {
+    const actions = getSimActions();
+    let totalScore = 0;
+    let totalMultiple = 0;
+    let totalRiskReduction = 0;
+    let totalTimeReduction = 0;
+
+    actions.forEach(a => {
+        if (simChecked[a.id]) {
+            totalScore += a.score;
+            totalMultiple += a.multiple;
+            totalRiskReduction += a.riskReduction;
+            totalTimeReduction += a.timeReduction;
+        }
+    });
+
+    const mainScoreEl = document.getElementById('mainScore');
+    const baseScore = mainScoreEl ? parseInt(mainScoreEl.textContent) || 0 : 0;
+    const projected = Math.min(100, baseScore + totalScore);
+    const gaugeFill = document.getElementById('simGaugeFill');
+    const gaugeLabel = document.getElementById('simGaugeLabel');
+    if (gaugeFill) gaugeFill.style.width = projected + '%';
+    if (gaugeLabel) gaugeLabel.textContent = projected + '%';
+
+    const multipleEl = document.getElementById('simMultiple');
+    if (multipleEl) multipleEl.textContent = '+' + totalMultiple.toFixed(1) + 'x';
+    
+    const riskEl = document.getElementById('simRiskReduction');
+    if (riskEl) riskEl.textContent = '-' + Math.round(totalRiskReduction) + '%';
+
+    const baseTime = 14;
+    const newTime = Math.max(4, baseTime - totalTimeReduction);
+    const timeEl = document.getElementById('simTimeToMarket');
+    if (timeEl) timeEl.textContent = newTime + ' meses';
+
+    const profileEl = document.getElementById('simBuyerProfile');
+    if (profileEl) {
+        if (projected >= 80) profileEl.textContent = '🚀 Fundos de Private Equity e Players Estratégicos';
+        else if (projected >= 60) profileEl.textContent = '🏢 Compradores Nacionais e Regionais';
+        else if (projected >= 40) profileEl.textContent = '⚠️ Compradores Oportunistas e Locais';
+        else profileEl.textContent = '❌ Atratividade Muito Restrita';
+    }
+}
+
+// ============================================================
+// 12. PLANO DE AÇÃO
+// ============================================================
+function renderActions() {
+    const container = document.getElementById('actionGroups');
+    const s = scores;
+    const pillars = {
+        'Governança': { key: 'governance', actions: getActionsForPillar('governance') },
+        'Financeiro': { key: 'finance', actions: getActionsForPillar('finance') },
+        'Jurídico': { key: 'legal', actions: getActionsForPillar('legal') },
+        'Operacional': { key: 'operational', actions: getActionsForPillar('operational') },
+        'Estratégia': { key: 'strategy', actions: getActionsForPillar('strategy') },
+        'Pessoas': { key: 'people', actions: getActionsForPillar('people') }
+    };
+
+    let html = '';
+    Object.keys(pillars).forEach(name => {
+        const p = pillars[name];
+        const score = s[p.key] || 0;
+        if (score >= 70) {
+            html += `
+                <div class="action-group">
+                    <div class="group-title">${name} <span class="score-badge">✅ Excelência</span></div>
+                    <div class="excellence-badge">
+                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke:#00e676;"><polyline points="20 6 9 17 4 12"/></svg>
+                        Sua empresa já está em nível de excelência. Nenhuma ação necessária.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        const filtered = p.actions.filter(a => a.score > 0);
+        if (filtered.length === 0) {
+            html += `
+                <div class="action-group">
+                    <div class="group-title">${name} <span class="score-badge">${score}%</span></div>
+                    <div style="padding:12px 0; color:var(--cream-faint); font-size:12px;">Nenhuma ação específica identificada.</div>
+                </div>
+            `;
+            return;
+        }
+        filtered.sort((a, b) => b.score - a.score);
+        html += `
+            <div class="action-group">
+                <div class="group-title">${name} <span class="score-badge">${score}%</span></div>
+        `;
+        filtered.forEach(a => {
+            const preselected = simChecked[a.id] ? 'preselect' : '';
+            const checked = simChecked[a.id] ? 'checked' : '';
+            html += `
+                <div class="action-item ${preselected}">
+                    <input type="checkbox" ${checked} />
+                    <span class="label">${a.label}</span>
+                    <span class="impact-tag ${a.impact}">${a.impact}</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    });
+    container.innerHTML = html;
+}
+
+function getActionsForPillar(pillar) {
+    const map = {
+        governance: [
+            { id: 'gov1', label: 'Implementar Conselho Consultivo', impact: 'critical', score: 20 },
+            { id: 'gov2', label: 'Formalizar Acordo de Sócios', impact: 'high', score: 15 },
+            { id: 'gov3', label: 'Criar Plano de Sucessão', impact: 'high', score: 14 },
+            { id: 'gov4', label: 'Reestruturação Societária (Holding)', impact: 'medium', score: 10 }
+        ],
+        finance: [
+            { id: 'fin1', label: 'Contratar Auditoria Financeira', impact: 'critical', score: 22 },
+            { id: 'fin2', label: 'Otimizar Capital de Giro', impact: 'high', score: 16 },
+            { id: 'fin3', label: 'Constituir Reserva de Emergência', impact: 'high', score: 14 },
+            { id: 'fin4', label: 'Realizar Revisão Tributária', impact: 'high', score: 12 }
+        ],
+        legal: [
+            { id: 'leg1', label: 'Realizar Revisão Contratual', impact: 'critical', score: 18 },
+            { id: 'leg2', label: 'Regularizar Documentação Societária', impact: 'high', score: 15 },
+            { id: 'leg3', label: 'Registrar Marcas e Patentes', impact: 'high', score: 14 },
+            { id: 'leg4', label: 'Simular Impacto da Reforma Tributária', impact: 'medium', score: 10 }
+        ],
+        operational: [
+            { id: 'op1', label: 'Implementar ERP Integrado', impact: 'critical', score: 22 },
+            { id: 'op2', label: 'Documentar Processos (SOPs)', impact: 'high', score: 16 },
+            { id: 'op3', label: 'Migrar para Mercado Livre de Energia', impact: 'medium', score: 12 },
+            { id: 'op4', label: 'Otimizar Cadeia de Suprimentos', impact: 'medium', score: 10 }
+        ],
+        strategy: [
+            { id: 'est1', label: 'Elaborar Plano de Negócios 3-5 anos', impact: 'critical', score: 18 },
+            { id: 'est2', label: 'Desenvolver Pitch Deck', impact: 'high', score: 14 },
+            { id: 'est3', label: 'Estruturar Data Room', impact: 'high', score: 12 },
+            { id: 'est4', label: 'Implementar Hedge Cambial', impact: 'medium', score: 10 }
+        ],
+        people: [
+            { id: 'peo1', label: 'Estruturar Plano de Carreira', impact: 'critical', score: 16 },
+            { id: 'peo2', label: 'Implementar Programa de Benefícios', impact: 'high', score: 12 },
+            { id: 'peo3', label: 'Criar Programa de Treinamento', impact: 'high', score: 10 },
+            { id: 'peo4', label: 'Mapear Sucessão de Líderes', impact: 'medium', score: 10 }
+        ]
+    };
+    return map[pillar] || [];
+}
+
+// ============================================================
+// 13. RELATÓRIO
+// ============================================================
+function renderReport() {
+    const s = scores;
+    const overall = Object.values(s).reduce((a, b) => a + b, 0) / Object.values(s).length;
+    const overallRounded = Math.round(overall);
+
+    const reportScore = document.getElementById('reportScoreNumber');
+    if (reportScore) reportScore.textContent = overallRounded + '%';
+
+    let diagMsg = '';
+    if (overallRounded >= 80) diagMsg = 'Sua empresa está <span class="highlight">bem posicionada</span> para M&A. Fundos de Private Equity e compradores estratégicos demonstram interesse.';
+    else if (overallRounded >= 60) diagMsg = 'Seu nível de prontidão <span class="highlight">restringe o interesse</span> de fundos e reduz seu poder de barganha. Foco em estruturação.';
+    else if (overallRounded >= 40) diagMsg = 'Sua empresa está <span class="highlight">vulnerável a descontos severos</span> em negociações. Priorize a organização financeira e governança.';
+    else diagMsg = 'Sem governança e finanças organizadas, a venda ou captação se torna <span class="highlight">inviável</span>. Ação imediata necessária.';
+    const diagnostic = document.getElementById('reportDiagnostic');
+    if (diagnostic) diagnostic.innerHTML = diagMsg;
+
+    const potential = Math.min(95, overallRounded + 40);
+    const gain = potential - overallRounded;
+    const valuation = document.getElementById('reportValuationImpact');
+    if (valuation) {
+        valuation.innerHTML = `
+            <div><strong>Atual:</strong> ${overallRounded}% de prontidão</div>
+            <div><strong>Potencial:</strong> ${potential}% com ações corretivas</div>
+            <div style="margin-top:6px; color:var(--gold);">📈 Ganho estimado: <strong>+${gain}%</strong> em múltiplo de EBITDA</div>
+            <div style="font-size:11px; color:var(--cream-faint); margin-top:4px;">Empresas com >80% de prontidão negociam com prêmio de até 2x EBITDA.</div>
+        `;
+    }
+
+    const roadmap = document.getElementById('reportRoadmap');
+    if (roadmap) {
+        roadmap.innerHTML = `
+            <div class="phase urgent">
+                <div class="phase-title">🔴 Urgente (30 dias)</div>
+                <div class="phase-items">
+                    ${s.governance < 40 ? '<div class="item">Formalizar acordo de sócios</div>' : ''}
+                    ${s.finance < 40 ? '<div class="item">Contratar auditoria financeira</div>' : ''}
+                    ${s.legal < 40 ? '<div class="item">Revisão contratual e tributária</div>' : ''}
+                    ${s.governance >= 40 && s.finance >= 40 && s.legal >= 40 ? '<div class="item">Nenhuma ação urgente identificada</div>' : ''}
+                </div>
+            </div>
+            <div class="phase structure">
+                <div class="phase-title">🟡 Estruturação (30-90 dias)</div>
+                <div class="phase-items">
+                    ${s.governance < 60 ? '<div class="item">Criar conselho consultivo</div>' : ''}
+                    ${s.finance < 60 ? '<div class="item">Otimizar capital de giro</div>' : ''}
+                    ${s.operational < 60 ? '<div class="item">Implementar ERP e documentar SOPs</div>' : ''}
+                    ${s.governance >= 60 && s.finance >= 60 && s.operational >= 60 ? '<div class="item">Manter excelência operacional</div>' : ''}
+                </div>
+            </div>
+            <div class="phase expand">
+                <div class="phase-title">🟢 Expansão (90+ dias)</div>
+                <div class="phase-items">
+                    ${s.strategy < 60 ? '<div class="item">Elaborar pitch deck e data room</div>' : ''}
+                    ${s.people < 60 ? '<div class="item">Estruturar plano de carreira e sucessão</div>' : ''}
+                    ${s.strategy >= 60 && s.people >= 60 ? '<div class="item">Preparar para rodada de investimento</div>' : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    const solutions = generateSolutions();
+    let solHtml = '<ul>';
+    if (solutions.length === 0) {
+        solHtml += '<li>✅ Sua empresa está bem posicionada. Nenhuma solução urgente necessária.</li>';
+    } else {
+        solutions.forEach(o => {
+            solHtml += `<li><span class="bullet">•</span> <strong>${o.title}</strong> — ${o.desc} <span style="color:var(--gold);font-size:10px;">(${o.partner})</span></li>`;
+        });
+    }
+    solHtml += '</ul>';
+    const solutionsEl = document.getElementById('reportSolutions');
+    if (solutionsEl) solutionsEl.innerHTML = solHtml;
+
+    // Inicializar radar chart do relatório via charts.js
+    if (typeof initReportRadar === 'function') {
+        initReportRadar(s);
+    }
+}
+
+// ============================================================
+// 14. GERAR PDF
+// ============================================================
 function generatePDF() {
-  const element = document.getElementById('reportContainer');
-  if (!element) return;
-  
-  const opt = {
-    margin: 10,
-    filename: 'relatorio-ma-readiness-baren.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, letterRendering: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(element).save();
+    const element = document.getElementById('reportContainer');
+    if (!element) return;
+    
+    const originalOverflow = document.body.style.overflow;
+    const originalHeight = element.style.height;
+    
+    element.style.height = 'auto';
+    document.body.style.overflow = 'visible';
+    
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: 'relatorio-ma-readiness-baren.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            letterRendering: true,
+            useCORS: true,
+            allowTaint: true,
+            scrollY: 0,
+            scrollX: 0,
+            windowHeight: element.scrollHeight,
+            windowWidth: element.scrollWidth,
+            height: element.scrollHeight,
+            width: element.scrollWidth
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    
+    setTimeout(() => {
+        html2pdf()
+            .set(opt)
+            .from(element)
+            .save()
+            .then(() => {
+                document.body.style.overflow = originalOverflow;
+                element.style.height = originalHeight;
+            })
+            .catch((err) => {
+                console.error('Erro ao gerar PDF:', err);
+                document.body.style.overflow = originalOverflow;
+                element.style.height = originalHeight;
+            });
+    }, 300);
 }
 
 // ============================================================
-// 27. INICIALIZAÇÃO
+// 15. INICIALIZAÇÃO
 // ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    renderApp();
+    updateProgress(1);
+});
 
-/**
- * Inicializa a aplicação
- */
-function initApp() {
-  // Renderiza navegação
-  renderNavigation();
-  
-  // Renderiza todas as páginas
-  renderAllPages();
-  
-  // Renderiza as perguntas
-  renderQuestions('questions1', ['g1', 'g2', 'g3', 'g4', 'g5', 'f1', 'f2', 'f3', 'f4', 'f5']);
-  renderQuestions('questions2', ['j1', 'j2', 'j3', 'j4', 'j5', 'o1', 'o2', 'o3', 'o4', 'o5']);
-  renderQuestions('questions3', ['e1', 'e2', 'e3', 'e4', 'e5', 'p1', 'p2', 'p3', 'p4', 'p5']);
-  
-  // Atualiza progresso
-  updateProgress(1);
-}
-
-// ============================================================
-// 28. EVENTOS GLOBAIS
-// ============================================================
-
-// Inicializa quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', initApp);
-
-// Redesenha o gauge ao redimensionar a janela (apenas na página 6)
+// Redraw gauge on resize
 window.addEventListener('resize', () => {
-  if (state.currentPage == 6) {
-    const score = parseInt(document.getElementById('mainScore')?.textContent) || 0;
-    if (score > 0) {
-      drawGauge('gaugeCanvas', score);
+    if (currentPage == 6) {
+        const mainScore = document.getElementById('mainScore');
+        if (mainScore) drawGauge(parseInt(mainScore.textContent) || 0);
     }
-  }
 });
