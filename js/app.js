@@ -3,17 +3,13 @@
 // ============================================================
 
 // ============================================================
-// 1. NAVEGAÇÃO ENTRE PÁGINAS
+// 1. VARIÁVEIS GLOBAIS
 // ============================================================
 let currentPage = 1;
 let selectedObjectives = [];
 let answers = {};
 let scores = {};
 let simChecked = {};
-let radarChart = null;
-let subPillarChart = null;
-let valuationChart = null;
-let reportRadarChartInstance = null;
 let gaugeCtx = null;
 
 // ============================================================
@@ -477,38 +473,7 @@ function getPillarScores() {
 }
 
 function getSubPillarData() {
-    const subMap = {
-        'Conselho/Decisão': ['g1'],
-        'Acordo de Sócios': ['g2'],
-        'Blindagem Patrimonial': ['g3'],
-        'Sucessão': ['g4'],
-        'Estrutura Jurídica': ['g5'],
-        'Auditoria': ['f1'],
-        'Reserva de Caixa': ['f2'],
-        'Capital de Giro': ['f3'],
-        'Taxas Bancárias': ['f4'],
-        'Revisão Tributária': ['f5'],
-        'Contratos': ['j1'],
-        'Documentação Societária': ['j2'],
-        'Propriedade Intelectual': ['j3'],
-        'Planejamento Tributário': ['j4'],
-        'Reforma Tributária': ['j5'],
-        'SOPs': ['o1'],
-        'ERP': ['o2'],
-        'Eficiência Energética': ['o3'],
-        'Mercado Livre de Energia': ['o4'],
-        'Cadeia de Suprimentos': ['o5'],
-        'Plano Estratégico': ['e1'],
-        'Pitch Deck/Data Room': ['e2'],
-        'Hedge Cambial': ['e3'],
-        'Otimização Cambial': ['e4'],
-        'Internacionalização': ['e5'],
-        'Alinhamento': ['p1'],
-        'Plano de Carreira': ['p2'],
-        'Benefícios': ['p3'],
-        'Treinamento': ['p4'],
-        'Sucessão de Líderes': ['p5']
-    };
+    const subMap = window.SUB_PILLAR_MAP || {};
     const result = {};
     Object.keys(subMap).forEach(label => {
         const qs = subMap[label];
@@ -796,45 +761,7 @@ function generateSolutions() {
     const sorted = Object.keys(s).sort((a, b) => s[a] - s[b]);
     const worst = sorted.slice(0, 2);
 
-    const solutionMap = {
-        governance: {
-            title: 'Estruturação de Governança e Acordo de Sócios',
-            desc: 'Formalização de conselho consultivo, acordo de sócios e plano de sucessão.',
-            partner: 'Baren Estratégia',
-            svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
-        },
-        finance: {
-            title: 'Due Diligence Financeira e Otimização de Capital',
-            desc: 'Auditoria de balanços, reestruturação de capital de giro e revisão tributária.',
-            partner: 'Studio Fiscal / Globus',
-            svg: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><line x1="18" y1="12" x2="18" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/><line x1="10" y1="12" x2="10" y2="17"/>'
-        },
-        legal: {
-            title: 'Regularização Jurídica e Tributária',
-            desc: 'Revisão de contratos, registro de marcas, compliance e planejamento tributário.',
-            partner: 'Nicacio & Studio Fiscal',
-            svg: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>'
-        },
-        operational: {
-            title: 'Eficiência Operacional e Energética',
-            desc: 'Documentação de processos, implementação de ERP e migração para Mercado Livre de Energia.',
-            partner: 'Trillia / Ynova',
-            svg: '<path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v12"/><path d="M6 12h12"/>'
-        },
-        strategy: {
-            title: 'Planejamento Estratégico e Internacionalização',
-            desc: 'Desenvolvimento de plano de negócios, pitch deck, data room e otimização cambial.',
-            partner: 'Baren Estratégia / Travellex',
-            svg: '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
-        },
-        people: {
-            title: 'Gestão de Talentos e Benefícios',
-            desc: 'Plano de carreira, benefícios competitivos, treinamento e mapeamento de sucessão.',
-            partner: 'EA Partners',
-            svg: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
-        }
-    };
-
+    const solutionMap = window.SOLUTIONS || {};
     const result = [];
     worst.forEach(key => {
         if (s[key] < 70 && solutionMap[key]) {
@@ -1011,44 +938,7 @@ function renderActions() {
 }
 
 function getActionsForPillar(pillar) {
-    const map = {
-        governance: [
-            { id: 'gov1', label: 'Implementar Conselho Consultivo', impact: 'critical', score: 20 },
-            { id: 'gov2', label: 'Formalizar Acordo de Sócios', impact: 'high', score: 15 },
-            { id: 'gov3', label: 'Criar Plano de Sucessão', impact: 'high', score: 14 },
-            { id: 'gov4', label: 'Reestruturação Societária (Holding)', impact: 'medium', score: 10 }
-        ],
-        finance: [
-            { id: 'fin1', label: 'Contratar Auditoria Financeira', impact: 'critical', score: 22 },
-            { id: 'fin2', label: 'Otimizar Capital de Giro', impact: 'high', score: 16 },
-            { id: 'fin3', label: 'Constituir Reserva de Emergência', impact: 'high', score: 14 },
-            { id: 'fin4', label: 'Realizar Revisão Tributária', impact: 'high', score: 12 }
-        ],
-        legal: [
-            { id: 'leg1', label: 'Realizar Revisão Contratual', impact: 'critical', score: 18 },
-            { id: 'leg2', label: 'Regularizar Documentação Societária', impact: 'high', score: 15 },
-            { id: 'leg3', label: 'Registrar Marcas e Patentes', impact: 'high', score: 14 },
-            { id: 'leg4', label: 'Simular Impacto da Reforma Tributária', impact: 'medium', score: 10 }
-        ],
-        operational: [
-            { id: 'op1', label: 'Implementar ERP Integrado', impact: 'critical', score: 22 },
-            { id: 'op2', label: 'Documentar Processos (SOPs)', impact: 'high', score: 16 },
-            { id: 'op3', label: 'Migrar para Mercado Livre de Energia', impact: 'medium', score: 12 },
-            { id: 'op4', label: 'Otimizar Cadeia de Suprimentos', impact: 'medium', score: 10 }
-        ],
-        strategy: [
-            { id: 'est1', label: 'Elaborar Plano de Negócios 3-5 anos', impact: 'critical', score: 18 },
-            { id: 'est2', label: 'Desenvolver Pitch Deck', impact: 'high', score: 14 },
-            { id: 'est3', label: 'Estruturar Data Room', impact: 'high', score: 12 },
-            { id: 'est4', label: 'Implementar Hedge Cambial', impact: 'medium', score: 10 }
-        ],
-        people: [
-            { id: 'peo1', label: 'Estruturar Plano de Carreira', impact: 'critical', score: 16 },
-            { id: 'peo2', label: 'Implementar Programa de Benefícios', impact: 'high', score: 12 },
-            { id: 'peo3', label: 'Criar Programa de Treinamento', impact: 'high', score: 10 },
-            { id: 'peo4', label: 'Mapear Sucessão de Líderes', impact: 'medium', score: 10 }
-        ]
-    };
+    const map = window.ACTION_PLANS || {};
     return map[pillar] || [];
 }
 
